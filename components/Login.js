@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function Login({ entrar }) {
-  // guarda o nome digitado
+  // guarda o nome de quem fez o login
   const [nome, setNome] = useState('');
 
-  // deixa o perfil fixo por enquanto
+  // deixa o perfil fixado (por enquanto)
   const [perfil] = useState('Administrador');
 
-  // funcao executada quando clicar no botao Entrar
   function fazerLogin() {
-    // verifica se o nome foi preenchido
     if (nome.trim() === '') {
       Alert.alert('Erro', 'Preencha o nome do usuario.');
       return;
@@ -26,11 +24,9 @@ export default function Login({ entrar }) {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        {/* titulo principal */}
         <Text style={styles.titulo}>SIA</Text>
         <Text style={styles.subtitulo}>Sistema de Almoxarifado</Text>
 
-        {/* campo nome */}
         <Text style={styles.label}>Nome</Text>
         <TextInput
           style={styles.input}
@@ -39,13 +35,11 @@ export default function Login({ entrar }) {
           onChangeText={setNome}
         />
 
-        {/* perfil fixo */}
         <Text style={styles.label}>Perfil</Text>
         <View style={styles.caixaPerfil}>
           <Text style={styles.textoPerfil}>{perfil}</Text>
         </View>
 
-        {/* botao para entrar */}
         <View style={styles.botao}>
           <Button title="Entrar" onPress={fazerLogin} color="#2563eb" />
         </View>
@@ -111,3 +105,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+// Ainda falta adicionar os icones

@@ -1,26 +1,32 @@
 import { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
-// importa a tela de login
+// importação da tela de login
 import Login from './components/Login';
 
-// importa a tela inicial
+// importação da tela inicial
 import Inicio from './components/Inicio';
 
 export default function App() {
-  // guarda qual tela esta aparecendo
+  // me mostra qual tela esta visivel
   const [telaAtual, setTelaAtual] = useState('login');
 
   // guarda os dados do usuario depois do login
   const [usuario, setUsuario] = useState(null);
 
-  // esta funcao recebe os dados vindos do Login
+  // esta função recebe os dados vindos do Login
   function entrar(dadosUsuario) {
     setUsuario(dadosUsuario);
     setTelaAtual('inicio');
   }
 
-  // estas funcoes sao dos botoes da tela inicial
+  // esta função volta para a tela de login
+  function voltarParaLogin() {
+    setUsuario(null);
+    setTelaAtual('login');
+  }
+
+  // estas funções são dos botões da tela inicial, no momento eles só estão dizendo oque cada botão faz
   function irParaEstoque() {
     Alert.alert('Estoque', 'Aqui vai abrir a tela de Estoque.');
   }
@@ -35,16 +41,14 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {/* se estiver no login, mostra a tela Login */}
       {telaAtual === 'login' && <Login entrar={entrar} />}
-
-      {/* se estiver no inicio, mostra a tela Inicio */}
       {telaAtual === 'inicio' && (
         <Inicio
           usuario={usuario}
           irParaEstoque={irParaEstoque}
           irParaEntradas={irParaEntradas}
           irParaSaidas={irParaSaidas}
+          voltarParaLogin={voltarParaLogin}
         />
       )}
     </View>
@@ -56,3 +60,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+
+
+
+
+
+
+// Ainda falta adicionar os icones
