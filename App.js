@@ -1,70 +1,125 @@
-import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// importação da tela de login
-import Login from './components/Login';
+import Introducao from "./components/Introducao";
+import Login from "./components/Login";
+import RedefinirSenha from "./components/RedefinirSenha";
+import Inicio from "./components/Inicio";
+import Estoque from "./components/Estoque";
+import Entradas from "./components/Entradas";
+import Saidas from "./components/Saidas";
+import Usuarios from "./components/Usuarios";
 
-// importação da tela inicial
-import Inicio from './components/Inicio';
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  // me mostra qual tela esta visivel
-  const [telaAtual, setTelaAtual] = useState('login');
-
-  // guarda os dados do usuario depois do login
-  const [usuario, setUsuario] = useState(null);
-
-  // esta função recebe os dados vindos do Login
-  function entrar(dadosUsuario) {
-    setUsuario(dadosUsuario);
-    setTelaAtual('inicio');
-  }
-
-  // esta função volta para a tela de login
-  function voltarParaLogin() {
-    setUsuario(null);
-    setTelaAtual('login');
-  }
-
-  // estas funções são dos botões da tela inicial, no momento eles só estão dizendo oque cada botão faz
-  function irParaEstoque() {
-    Alert.alert('Estoque', 'Aqui vai abrir a tela de Estoque.');
-  }
-
-  function irParaEntradas() {
-    Alert.alert('Entradas', 'Aqui vai abrir a tela de Entradas.');
-  }
-
-  function irParaSaidas() {
-    Alert.alert('Saidas', 'Aqui vai abrir a tela de Saidas.');
-  }
-
   return (
-    <View style={styles.container}>
-      {telaAtual === 'login' && <Login entrar={entrar} />}
-      {telaAtual === 'inicio' && (
-        <Inicio
-          usuario={usuario}
-          irParaEstoque={irParaEstoque}
-          irParaEntradas={irParaEntradas}
-          irParaSaidas={irParaSaidas}
-          voltarParaLogin={voltarParaLogin}
-        />
-      )}
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="Introducao"
+        screenOptions={{
+          headerShown: false,
+          animation: "none",
+        }}
+      >
+        {/* Introdução animada */}
+        <Stack.Screen name="Introducao">
+          {({ navigation }) => <Introducao finalizar={() => navigation.replace("Login")} />}
+        </Stack.Screen>
+
+        {/* Login */}
+        <Stack.Screen name="Login">
+          {({ navigation }) => (
+            <Login
+              entrar={(dadosUsuario) => {
+                // Primeiro acesso obrigatório
+                if (dadosUsuario.primeiroAcesso === true) {
+                  navigation.replace("RedefinirSenha", {
+                    usuario: dadosUsuario,
+                  });
+                  return;
+                }
+
+                // Login normal
+                navigation.replace("Inicio", {
+                  usuario: dadosUsuario,
+                });
+              }}
+            />
+          )}
+        </Stack.Screen>
+
+        {/* Primeiro acesso */}
+        <Stack.Screen name="RedefinirSenha">
+          {({ navigation, route }) => (
+            <RedefinirSenha
+              usuario={route.params?.usuario}
+              concluir={(usuarioAtualizado) => {
+                navigation.replace("Inicio", {
+                  usuario: usuarioAtualizado,
+                });
+              }}
+              voltarLogin={() => {
+                navigation.replace("Login");
+              }}
+            />
+          )}
+        </Stack.Screen>
+
+        {/* Tela inicial */}
+        <Stack.Screen name="Inicio">
+          {({ navigation, route }) => {
+            const usuario = route.params?.usuario;
+
+            return (
+              <Inicio
+                usuario={usuario}
+                irParaEstoque={() =>
+                  navigation.navigate("Estoque", {
+                    usuario,
+                  })
+                }
+                irParaEntradas={() => {
+                  if (usuario?.perfil === "admin") {
+                    navigation.navigate("Entradas", { usuario });
+                  }
+                }}
+                irParaSaidas={() =>
+                  navigation.navigate("Saidas", {
+                    usuario,
+                  })
+                }
+                irParaUsuarios={() => {
+                  if (usuario?.perfil === "admin") {
+                    navigation.navigate("Usuarios", { usuario });
+                  }
+                }}
+                voltarParaLogin={() => navigation.replace("Login")}
+              />
+            );
+          }}
+        </Stack.Screen>
+
+        {/* Estoque */}
+        <Stack.Screen name="Estoque">
+          {({ navigation, route }) => <Estoque usuario={route.params?.usuario} voltar={() => navigation.goBack()} />}
+        </Stack.Screen>
+
+        {/* Entradas */}
+        <Stack.Screen name="Entradas">
+          {({ navigation, route }) => <Entradas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />}
+        </Stack.Screen>
+
+        {/* Requisições */}
+        <Stack.Screen name="Saidas">
+          {({ navigation, route }) => <Saidas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />}
+        </Stack.Screen>
+
+        {/* Usuários */}
+        <Stack.Screen name="Usuarios">
+          {({ navigation, route }) => <Usuarios usuario={route.params?.usuario} voltar={() => navigation.goBack()} />}
+        </Stack.Screen>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-
-
-
-
-
-
-// Ainda falta adicionar os icones
