@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Alert,
@@ -33,6 +33,9 @@ export default function Login({ entrar }) {
 
   const [mensagemLogin, setMensagemLogin] = useState("");
   const [entrando, setEntrando] = useState(false);
+  const [loginConfirmado, setLoginConfirmado] = useState(false);
+  const temporizadorLogin = useRef(null);
+  useEffect(() => () => clearTimeout(temporizadorLogin.current), []);
   const [recuperando, setRecuperando] = useState(false);
 
   function abrirRecuperacao() {
@@ -124,6 +127,7 @@ export default function Login({ entrar }) {
 
     setMensagemRecuperacao("");
     setMensagemLogin("");
+    setLoginConfirmado(false);
 
     const emailLimpo = email.trim().toLowerCase();
 
@@ -133,6 +137,7 @@ export default function Login({ entrar }) {
     }
 
     setEntrando(true);
+    let autenticado = false;
 
     try {
       const resposta = await fetch(`${API_URL}/auth/login`, {
@@ -162,10 +167,12 @@ export default function Login({ entrar }) {
       }
 
       Keyboard.dismiss();
-
-      setMensagemLogin("");
-
-      entrar(dadosUsuario);
+      autenticado = true;
+      setLoginConfirmado(true);
+      setMensagemLogin(dadosUsuario.primeiroAcesso === true
+        ? "Primeiro acesso confirmado. Redefina sua senha."
+        : "Login realizado com sucesso!");
+      temporizadorLogin.current = setTimeout(() => entrar(dadosUsuario), 900);
     } catch (erro) {
       console.error("Erro ao fazer login:", erro);
 
@@ -175,7 +182,7 @@ export default function Login({ entrar }) {
           : erro.message,
       );
     } finally {
-      setEntrando(false);
+      if (!autenticado) setEntrando(false);
     }
   }
 
@@ -274,11 +281,11 @@ export default function Login({ entrar }) {
                 ]}
               >
                 <Text style={styles.textoBotao}>
-                  {entrando ? "Entrando..." : "Entrar"}
+                  {loginConfirmado ? "Login confirmado" : entrando ? "Entrando..." : "Entrar"}
                 </Text>
               </Pressable>
 
-              {entrando && (
+              {entrando && !loginConfirmado && (
                 <View style={styles.caixaEntrando}>
                   <Text style={styles.textoEntrando}>
                     Verificando seus dados...
@@ -287,8 +294,8 @@ export default function Login({ entrar }) {
               )}
 
               {!!mensagemLogin && (
-                <View style={styles.caixaLoginErro}>
-                  <Text style={styles.textoLoginErro}>{mensagemLogin}</Text>
+                <View style={loginConfirmado ? styles.caixaLoginSucesso : styles.caixaLoginErro}>
+                  <Text style={loginConfirmado ? styles.textoLoginSucesso : styles.textoLoginErro}>{mensagemLogin}</Text>
                 </View>
               )}
 
@@ -552,6 +559,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  caixaLoginSucesso: { backgroundColor: "#dcfce7", borderWidth: 1, borderColor: "#bbf7d0", borderRadius: 8, padding: 10, marginTop: 14 },
+  textoLoginSucesso: { color: "#166534", fontSize: 13, fontWeight: "600", textAlign: "center" },
   caixaLoginErro: {
     backgroundColor: "#fef2f2",
     borderWidth: 1,
