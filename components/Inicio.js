@@ -19,6 +19,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [senhasVisiveis, setSenhasVisiveis] = useState({});
   const [alterandoSenha, setAlterandoSenha] = useState(false);
   const [mensagem, setMensagem] = useState(null);
   const notificar = (titulo, descricao) => setMensagem({ titulo, descricao });
@@ -209,9 +210,16 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
             ].map(([rotulo, valor, alterar]) => (
               <View key={rotulo}>
                 <Text style={[styles.campoRotulo, { color: cores.secundario }]}>{rotulo}</Text>
-                <TextInput style={[styles.campoPerfil, { color: cores.texto, borderColor: cores.borda }]}
-                  value={valor} onChangeText={alterar} secureTextEntry editable={!alterandoSenha}
-                  autoCapitalize="none" />
+                <View style={[styles.campoSenhaContainer, { borderColor: cores.borda }]}>
+                  <TextInput style={[styles.campoSenhaInput, { color: cores.texto }]}
+                    value={valor} onChangeText={alterar} secureTextEntry={!senhasVisiveis[rotulo]}
+                    editable={!alterandoSenha} autoCapitalize="none" />
+                  <Pressable onPress={() => setSenhasVisiveis((anterior) => ({ ...anterior, [rotulo]: !anterior[rotulo] }))}
+                    accessibilityRole="button" accessibilityLabel={senhasVisiveis[rotulo] ? "Ocultar senha" : "Mostrar senha"}
+                    style={styles.botaoVisibilidade}>
+                    <Text style={{ fontSize: 19 }}>{senhasVisiveis[rotulo] ? "🙈" : "👁️"}</Text>
+                  </Pressable>
+                </View>
               </View>
             ))}
             <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={salvarSenha}>
@@ -282,6 +290,9 @@ const styles = StyleSheet.create({
   fecharTexto: { color: "#3B82F6", fontWeight: "700" },
   campoRotulo: { fontSize: 12, fontWeight: "700", marginTop: 12, marginBottom: 6 },
   campoPerfil: { borderWidth: 1, borderRadius: 12, padding: 12, fontSize: 15 },
+  campoSenhaContainer: { borderWidth: 1, borderRadius: 12, flexDirection: "row", alignItems: "center" },
+  campoSenhaInput: { flex: 1, padding: 12, fontSize: 15, minWidth: 0 },
+  botaoVisibilidade: { paddingHorizontal: 14, paddingVertical: 10 },
   campoSomenteLeitura: { borderRadius: 12, padding: 13, fontSize: 14 },
   salvarPerfil: { backgroundColor: "#2563EB", padding: 14, borderRadius: 12, alignItems: "center", marginTop: 22 },
   salvarPerfilTexto: { color: "#FFFFFF", fontWeight: "700" },
