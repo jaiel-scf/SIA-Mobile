@@ -15,6 +15,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { API_URL } from "../config/api";
 import PackagePlusIcon from "../assets/icons/package-plus.svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Unidades utilizadas no sistema
 const unidades = {
@@ -495,13 +496,14 @@ export default function Entradas({ usuario, voltar }) {
           <Text style={styles.textoVoltar}>‹</Text>
         </Pressable>
 
-        <View style={styles.caixaIcone}>
+        <LinearGradient colors={["#2563EB", "#38BDF8"]} style={styles.caixaIcone}>
           <PackagePlusIcon width={27} height={27} color="#ffffff" />
-        </View>
+        </LinearGradient>
 
         <View style={styles.areaTitulo}>
-          <Text style={styles.titulo}>Entradas</Text>
-          <Text style={styles.subtitulo}>Registrar entrada de produtos</Text>
+          <Text style={styles.etiqueta}>GESTÃO DE MATERIAIS</Text>
+          <Text style={styles.titulo}>Entrada de materiais</Text>
+          <Text style={styles.subtitulo}>Registre os materiais recebidos no estoque</Text>
         </View>
       </View>
 
@@ -536,7 +538,7 @@ export default function Entradas({ usuario, voltar }) {
           {/* Card de entrada */}
           {administrador && (
             <View style={styles.card}>
-              <Text style={styles.cardTitulo}>Dados da entrada</Text>
+              <View style={styles.cabecalhoCard}><View style={styles.pontoAzul} /><View style={{ flex: 1 }}><Text style={styles.cardTitulo}>Nova entrada</Text><Text style={styles.cardDescricao}>Preencha os dados do material recebido.</Text></View></View>
 
               <Text style={styles.label}>Tipo de entrada</Text>
 
@@ -802,7 +804,7 @@ export default function Entradas({ usuario, voltar }) {
                     {salvando
                       ? "Salvando..."
                       : tipoEntrada === "existente"
-                        ? "Salvar entrada"
+                        ? "Registrar entrada"
                         : "Cadastrar produto"}
                   </Text>
                 </Pressable>
@@ -830,7 +832,7 @@ export default function Entradas({ usuario, voltar }) {
 
           {/* Histórico da sessão */}
           <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Últimas entradas</Text>
+            <View style={styles.cabecalhoCard}><View style={styles.iconeHistorico}><PackagePlusIcon width={20} height={20} color="#2563EB" /></View><View style={{ flex: 1 }}><Text style={styles.cardTitulo}>Últimas entradas</Text><Text style={styles.cardDescricao}>Registros realizados nesta sessão.</Text></View></View>
 
             {ultimasEntradas.length === 0 && (
               <Text style={styles.semEntrada}>
@@ -867,9 +869,9 @@ export default function Entradas({ usuario, voltar }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#F4F7FC",
     paddingHorizontal: 20,
-    paddingTop: 55,
+    paddingTop: 36,
   },
 
   cabecalho: {
@@ -882,7 +884,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#EAF1FC",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -890,15 +892,14 @@ const styles = StyleSheet.create({
 
   textoVoltar: {
     fontSize: 32,
-    color: "#166534",
+    color: "#2563EB",
     marginTop: -3,
   },
 
   caixaIcone: {
-    width: 45,
-    height: 45,
-    borderRadius: 13,
-    backgroundColor: "#16a34a",
+    width: 48,
+    height: 48,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -920,6 +921,11 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  etiqueta: { fontSize: 10, fontWeight: "800", color: "#2563EB", letterSpacing: 1.3, marginBottom: 3 },
+  cabecalhoCard: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 20 },
+  pontoAzul: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#2563EB" },
+  cardDescricao: { fontSize: 12, color: "#64748B", marginTop: 4 },
+  iconeHistorico: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#EFF6FF", alignItems: "center", justifyContent: "center" },
   areaTeclado: {
     flex: 1,
   },
@@ -931,7 +937,9 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "#ffffff",
-    borderRadius: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E7EDF5",
     padding: 20,
     marginBottom: 18,
     shadowColor: "#000000",
@@ -939,7 +947,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.035,
     shadowRadius: 5,
     elevation: 3,
   },
@@ -948,7 +956,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#0f172a",
-    marginBottom: 20,
+    marginBottom: 2,
   },
 
   label: {
@@ -968,7 +976,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 48,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#DBE3EE",
     borderRadius: 12,
     backgroundColor: "#ffffff",
     alignItems: "center",
@@ -977,8 +985,8 @@ const styles = StyleSheet.create({
   },
 
   botaoTipoSelecionado: {
-    backgroundColor: "#16a34a",
-    borderColor: "#16a34a",
+    backgroundColor: "#2563EB",
+    borderColor: "#2563EB",
   },
 
   textoTipo: {
@@ -995,7 +1003,7 @@ const styles = StyleSheet.create({
   input: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#DBE3EE",
     borderRadius: 12,
     paddingHorizontal: 14,
     fontSize: 15,
@@ -1013,7 +1021,7 @@ const styles = StyleSheet.create({
     minHeight: 90,
     maxHeight: 150,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#DBE3EE",
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
@@ -1026,7 +1034,7 @@ const styles = StyleSheet.create({
   seletor: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#DBE3EE",
     borderRadius: 12,
     paddingHorizontal: 14,
     flexDirection: "row",
@@ -1085,7 +1093,7 @@ const styles = StyleSheet.create({
   },
 
   botaoCodigo: {
-    backgroundColor: "#334155",
+    backgroundColor: "#EFF6FF",
     padding: 13,
     borderRadius: 10,
     alignItems: "center",
@@ -1093,7 +1101,7 @@ const styles = StyleSheet.create({
   },
 
   textoCodigo: {
-    color: "#ffffff",
+    color: "#2563EB",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -1113,7 +1121,7 @@ const styles = StyleSheet.create({
   },
 
   unidadeSelecionada: {
-    backgroundColor: "#dcfce7",
+    backgroundColor: "#DBEAFE",
   },
 
   textoUnidade: {
@@ -1122,7 +1130,7 @@ const styles = StyleSheet.create({
   },
 
   textoUnidadeSelecionada: {
-    color: "#166534",
+    color: "#1D4ED8",
     fontWeight: "bold",
   },
 
@@ -1148,7 +1156,7 @@ const styles = StyleSheet.create({
   botaoSalvar: {
     flex: 1,
     minHeight: 50,
-    backgroundColor: "#16a34a",
+    backgroundColor: "#2563EB",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -1170,7 +1178,7 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#DBE3EE",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
