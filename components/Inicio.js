@@ -3,10 +3,9 @@ import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "rea
 import { LinearGradient } from "expo-linear-gradient";
 
 import BlocksIcon from "../assets/icons/blocks.svg";
-import UserPlusIcon from "../assets/icons/user-plus.svg";
 import BotaoTema from "./BotaoTema";
 
-export default function Inicio({ usuario, irParaUsuarios, voltarParaLogin, escuro, alternarTema }) {
+export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [preferencias, setPreferencias] = useState(false);
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
@@ -52,7 +51,7 @@ export default function Inicio({ usuario, irParaUsuarios, voltarParaLogin, escur
           <Text style={styles.perfil}>{perfil}</Text>
         </LinearGradient>
 
-        <Text style={[styles.secao, { color: cores.texto }]}>Visão geral</Text>
+        <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
         <View style={[styles.card, { backgroundColor: cores.card, borderColor: cores.borda }]}>
           <Text style={[styles.cardTitulo, { color: cores.texto }]}>Seu almoxarifado em um só lugar</Text>
           <Text style={[styles.descricao, { color: cores.secundario }]}>
@@ -61,24 +60,6 @@ export default function Inicio({ usuario, irParaUsuarios, voltarParaLogin, escur
           </Text>
         </View>
 
-        {administrador && (
-          <>
-            <Text style={[styles.secao, { color: cores.texto }]}>Gestão</Text>
-            <Pressable
-              onPress={irParaUsuarios}
-              style={[styles.gestao, { backgroundColor: cores.card, borderColor: cores.borda }]}
-            >
-              <View style={styles.iconeGestao}>
-                <UserPlusIcon width={24} height={24} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.cardTitulo, { color: cores.texto }]}>Usuários</Text>
-                <Text style={{ color: cores.secundario }}>Cadastrar e gerenciar usuários</Text>
-              </View>
-              <Text style={{ fontSize: 25, color: cores.secundario }}>›</Text>
-            </Pressable>
-          </>
-        )}
       </ScrollView>
 
       <Modal transparent visible={menuAberto} animationType="fade" onRequestClose={() => setMenuAberto(false)}>
@@ -135,8 +116,6 @@ const styles = StyleSheet.create({
   card: { borderRadius: 17, borderWidth: 1, padding: 20, marginBottom: 25 },
   cardTitulo: { fontSize: 15, fontWeight: "700", marginBottom: 5 },
   descricao: { fontSize: 13, lineHeight: 21 },
-  gestao: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 16, borderWidth: 1, gap: 12 },
-  iconeGestao: { width: 46, height: 46, borderRadius: 13, backgroundColor: "#7C3AED", alignItems: "center", justifyContent: "center" },
   sobreposicao: { flex: 1, backgroundColor: "#00000088", justifyContent: "center", padding: 20 },
   menuConta: { borderRadius: 18, paddingVertical: 12, paddingHorizontal: 18, maxWidth: 420, width: "100%", alignSelf: "center" },
   menuCabecalho: { fontSize: 11, fontWeight: "700", letterSpacing: 1.3, marginTop: 10 },
