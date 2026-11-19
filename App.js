@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View } from "react-native";
+import { useState } from "react";
 
 import MenuInferior from "./components/MenuInferior";
 
@@ -15,12 +16,13 @@ import Usuarios from "./components/Usuarios";
 
 const Stack = createNativeStackNavigator();
 
-function TelaComMenu({ navigation, usuario, telaAtual, children }) {
+function TelaComMenu({ navigation, usuario, telaAtual, escuro, children }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>{children}</View>
       <MenuInferior
         telaAtual={telaAtual}
+        escuro={escuro}
         usuario={usuario}
         navegar={(tela) => {
           if (tela === "Entradas" && String(usuario?.perfil ?? "").toLowerCase() !== "admin") {
@@ -34,6 +36,8 @@ function TelaComMenu({ navigation, usuario, telaAtual, children }) {
 }
 
 export default function App() {
+  const [escuro, setEscuro] = useState(false);
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -93,9 +97,11 @@ export default function App() {
             const usuario = route.params?.usuario;
 
             return (
-              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Inicio">
+              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Inicio" escuro={escuro}>
                 <Inicio
                 usuario={usuario}
+                escuro={escuro}
+                alternarTema={() => setEscuro((anterior) => !anterior)}
                 irParaEstoque={() =>
                   navigation.navigate("Estoque", {
                     usuario,
@@ -126,7 +132,7 @@ export default function App() {
         {/* Estoque */}
         <Stack.Screen name="Estoque">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Estoque">
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Estoque" escuro={escuro}>
               <Estoque usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
             </TelaComMenu>
           )}
@@ -135,7 +141,7 @@ export default function App() {
         {/* Entradas */}
         <Stack.Screen name="Entradas">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Entradas">
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Entradas" escuro={escuro}>
               <Entradas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
             </TelaComMenu>
           )}
@@ -144,7 +150,7 @@ export default function App() {
         {/* Requisições */}
         <Stack.Screen name="Saidas">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Saidas">
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Saidas" escuro={escuro}>
               <Saidas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
             </TelaComMenu>
           )}
