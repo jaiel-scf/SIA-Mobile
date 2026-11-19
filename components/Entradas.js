@@ -73,6 +73,7 @@ export default function Entradas({ usuario, voltar }) {
   const [produtoSelecionado, setProdutoSelecionado] = useState("");
   const [mostrarProdutos, setMostrarProdutos] = useState(false);
   const [quantidade, setQuantidade] = useState("");
+  const [valorUnitario, setValorUnitario] = useState("");
 
   // Novo produto
   const [novoCodigo, setNovoCodigo] = useState("");
@@ -82,6 +83,7 @@ export default function Entradas({ usuario, voltar }) {
   const [novaUnidade, setNovaUnidade] = useState("");
   const [estoqueMinimo, setEstoqueMinimo] = useState("");
   const [quantidadeInicial, setQuantidadeInicial] = useState("");
+  const [valorUnitarioInicial, setValorUnitarioInicial] = useState("");
 
   // Campos da entrada
   const [observacao, setObservacao] = useState("");
@@ -183,6 +185,7 @@ export default function Entradas({ usuario, voltar }) {
   function limparEntradaExistente() {
     setProdutoSelecionado("");
     setQuantidade("");
+    setValorUnitario("");
     setObservacao("");
     setMostrarProdutos(false);
     setMensagemSucesso("");
@@ -197,6 +200,7 @@ export default function Entradas({ usuario, voltar }) {
     setNovaUnidade("");
     setEstoqueMinimo("");
     setQuantidadeInicial("");
+    setValorUnitarioInicial("");
     setObservacao("");
     setMensagemSucesso("");
   }
@@ -229,6 +233,7 @@ export default function Entradas({ usuario, voltar }) {
     produtoId,
     quantidadeEntrada,
     observacaoEntrada,
+    custoUnitario,
   ) {
     const resposta = await fetch(`${API_URL}/movimentacoes/registrar`, {
       method: "POST",
@@ -241,6 +246,7 @@ export default function Entradas({ usuario, voltar }) {
         usuarioId: Number(usuarioId),
         tipo: "ENTRADA",
         quantidade: quantidadeEntrada,
+        valorUnitario: custoUnitario,
         observacao: observacaoEntrada,
       }),
     });
@@ -272,6 +278,12 @@ export default function Entradas({ usuario, voltar }) {
       return;
     }
 
+    const custo = Number(valorUnitario.replace(",", "."));
+    if (!valorUnitario.trim() || !Number.isFinite(custo) || custo <= 0) {
+      Alert.alert("Erro", "Informe um custo unitário maior que zero.");
+      return;
+    }
+
     if (!Number.isSafeInteger(Number(usuarioId))) {
       Alert.alert("Erro", "Não foi possível identificar o usuário logado.");
       return;
@@ -293,12 +305,14 @@ export default function Entradas({ usuario, voltar }) {
         produto.id,
         Number(quantidade),
         observacao.trim(),
+        custo,
       );
 
       adicionarHistorico(produto.nome, Number(quantidade), "Entrada");
 
       setProdutoSelecionado("");
       setQuantidade("");
+      setValorUnitario("");
       setObservacao("");
       setMostrarProdutos(false);
       setMensagemSucesso("Entrada registrada com sucesso!");
@@ -330,6 +344,7 @@ export default function Entradas({ usuario, voltar }) {
     const localizacao = novaLocalizacao.trim();
     const minimo = Number(estoqueMinimo);
     const quantidadeRecebida = Number(quantidadeInicial);
+    const custoInicial = Number(valorUnitarioInicial.replace(",", "."));
 
     if (
       !nome ||
@@ -353,6 +368,11 @@ export default function Entradas({ usuario, voltar }) {
         "Erro",
         "Digite uma quantidade inicial inteira maior que zero.",
       );
+      return;
+    }
+
+    if (!valorUnitarioInicial.trim() || !Number.isFinite(custoInicial) || custoInicial <= 0) {
+      Alert.alert("Erro", "Informe um custo unitário inicial maior que zero.");
       return;
     }
 
@@ -418,6 +438,7 @@ export default function Entradas({ usuario, voltar }) {
           produtoCriado.id,
           quantidadeRecebida,
           observacao.trim(),
+          custoInicial,
         );
       } catch (error) {
         setProdutos((anteriores) => [produtoCriado, ...anteriores]);
@@ -425,6 +446,7 @@ export default function Entradas({ usuario, voltar }) {
         setTipoEntrada("existente");
         setProdutoSelecionado(String(produtoCriado.id));
         setQuantidade(String(quantidadeRecebida));
+        setValorUnitario(valorUnitarioInicial);
         setMostrarProdutos(false);
 
         Alert.alert(
@@ -622,6 +644,9 @@ export default function Entradas({ usuario, voltar }) {
                     keyboardType="number-pad"
                     editable={!salvando}
                   />
+
+                  <Text style={styles.label}>Custo unitário (R$)</Text>
+                  <TextInput style={styles.input} placeholder="Ex.: 12,50" placeholderTextColor="#94a3b8" value={valorUnitario} onChangeText={setValorUnitario} keyboardType="decimal-pad" editable={!salvando} />
                 </>
               )}
 
@@ -732,6 +757,9 @@ export default function Entradas({ usuario, voltar }) {
                     keyboardType="number-pad"
                     editable={!salvando}
                   />
+
+                  <Text style={styles.label}>Custo unitário inicial (R$)</Text>
+                  <TextInput style={styles.input} placeholder="Ex.: 12,50" placeholderTextColor="#94a3b8" value={valorUnitarioInicial} onChangeText={setValorUnitarioInicial} keyboardType="decimal-pad" editable={!salvando} />
                 </>
               )}
 
