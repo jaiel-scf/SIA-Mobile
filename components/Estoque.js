@@ -6,7 +6,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { API_URL } from "../config/api";
 import { LinearGradient } from "expo-linear-gradient";
-import PackageIcon from "../assets/icons/package (1).svg";
+import PackageIcon from "../assets/icons/clipboard-list.svg";
 
 import ClipboardListIcon from "../assets/icons/clipboard-list.svg";
 import ArrowDownIcon from "../assets/icons/circle-arrow-down.svg";
