@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import BlocksIcon from "../assets/icons/blocks.svg";
 import BotaoTema from "./BotaoTema";
 import CartaoBoasVindas from "./CartaoBoasVindas";
+import IndicadoresDashboard from "./IndicadoresDashboard";
 
 export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema }) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -49,13 +50,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
         <CartaoBoasVindas nome={usuario?.nome || "Usuário"} perfil={perfil} />
 
         <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
-        <View style={[styles.card, { backgroundColor: cores.card, borderColor: cores.borda }]}>
-          <Text style={[styles.cardTitulo, { color: cores.texto }]}>Seu almoxarifado em um só lugar</Text>
-          <Text style={[styles.descricao, { color: cores.secundario }]}>
-            Consulte o estoque e acompanhe as movimentações pelo menu inferior.
-            Os indicadores serão exibidos quando validarmos os dados disponíveis na API.
-          </Text>
-        </View>
+        <IndicadoresDashboard usuario={usuario} escuro={escuro} />
 
       </ScrollView>
 
