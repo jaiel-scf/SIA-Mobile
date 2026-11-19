@@ -1,322 +1,150 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-
+import { useState } from "react";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-// Ícone oficial do SIA
 import BlocksIcon from "../assets/icons/blocks.svg";
-
-// Ícones das funcionalidades
-import ClipboardListIcon from "../assets/icons/clipboard-list.svg";
-import PackagePlusIcon from "../assets/icons/package-plus.svg";
-import SendIcon from "../assets/icons/send.svg";
 import UserPlusIcon from "../assets/icons/user-plus.svg";
-import LogOutIcon from "../assets/icons/log-out.svg";
+import BotaoTema from "./BotaoTema";
 
-export default function Inicio({
-  usuario,
-  irParaEstoque,
-  irParaEntradas,
-  irParaSaidas,
-  irParaUsuarios,
-  voltarParaLogin,
-}) {
-  // Identifica o administrador
+export default function Inicio({ usuario, irParaUsuarios, voltarParaLogin, escuro, alternarTema }) {
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [preferencias, setPreferencias] = useState(false);
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
+  const perfil = administrador ? "Administrador" : "Usuário";
 
-  // Nome do perfil exibido no card
-  const nomePerfil = administrador ? "Administrador" : "Usuário";
+  const cores = {
+    fundo: escuro ? "#0B1220" : "#F4F7FC",
+    card: escuro ? "#17233A" : "#FFFFFF",
+    texto: escuro ? "#F8FAFC" : "#0F172A",
+    secundario: escuro ? "#A9B9D0" : "#64748B",
+    borda: escuro ? "#2B3B54" : "#E7EDF5",
+  };
+
+  function aviso(titulo) {
+    setMenuAberto(false);
+    Alert.alert(titulo, "Estamos verificando a integração segura com o backend antes de liberar esta função.");
+  }
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.conteudo}>
-        {/* Cabeçalho */}
+    <View style={[styles.container, { backgroundColor: cores.fundo }]}>
+      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
         <View style={styles.cabecalho}>
-          {/* Ícone oficial com o degradê do Login */}
-          <LinearGradient colors={["#2563eb", "#38bdf8"]} style={styles.logo}>
-            <BlocksIcon width={30} height={30} color="#ffffff" />
+          <LinearGradient colors={["#2563EB", "#38BDF8"]} style={styles.logo}>
+            <BlocksIcon width={29} height={29} color="#FFFFFF" />
           </LinearGradient>
-
-          {/* Nome do sistema */}
-          <View style={styles.areaTitulo}>
-            <Text style={styles.titulo}>SIA</Text>
-
-            <Text style={styles.subtitulo}>Sistema de Almoxarifado</Text>
+          <View style={styles.titulos}>
+            <Text style={[styles.titulo, { color: cores.texto }]}>SIA</Text>
+            <Text style={{ color: cores.secundario }}>Sistema de Almoxarifado</Text>
           </View>
-
-          {/* Sair */}
-          <Pressable style={styles.botaoSair} onPress={voltarParaLogin}>
-            <LogOutIcon width={22} height={22} color="#475569" />
+          <Pressable
+            onPress={() => setMenuAberto(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir menu da minha conta"
+            style={[styles.avatar, { backgroundColor: cores.card, borderColor: cores.borda }]}
+          >
+            <Text style={{ fontSize: 22 }}>👤</Text>
           </Pressable>
         </View>
 
-        {/* Boas-vindas */}
-        <View style={styles.cardBoasVindas}>
-          <Text style={styles.textoBemVindo}>Bem-vindo</Text>
+        <LinearGradient colors={["#1E40AF", "#2563EB"]} style={styles.boasVindas}>
+          <Text style={styles.saudacao}>Bem-vindo</Text>
+          <Text style={styles.nome}>{usuario?.nome || "Usuário"}</Text>
+          <Text style={styles.perfil}>{perfil}</Text>
+        </LinearGradient>
 
-          <Text style={styles.nomeUsuario}>{usuario?.nome || "Usuário"}</Text>
-
-          {/* Perfil sem aparência de botão */}
-          <Text style={styles.textoPerfil}>{nomePerfil}</Text>
+        <Text style={[styles.secao, { color: cores.texto }]}>Visão geral</Text>
+        <View style={[styles.card, { backgroundColor: cores.card, borderColor: cores.borda }]}>
+          <Text style={[styles.cardTitulo, { color: cores.texto }]}>Seu almoxarifado em um só lugar</Text>
+          <Text style={[styles.descricao, { color: cores.secundario }]}>
+            Consulte o estoque e acompanhe as movimentações pelo menu inferior.
+            Os indicadores serão exibidos quando validarmos os dados disponíveis na API.
+          </Text>
         </View>
 
-        {/* Acesso rápido */}
-        <Text style={styles.tituloSecao}>Acesso rápido</Text>
-
-        {/* Estoque - todos os usuários */}
-        <Pressable style={styles.cardMenu} onPress={irParaEstoque}>
-          <View style={styles.iconeAzul}>
-            <ClipboardListIcon width={27} height={27} color="#ffffff" />
-          </View>
-
-          <View style={styles.textoMenu}>
-            <Text style={styles.menuTitulo}>Estoque</Text>
-
-            <Text style={styles.menuDescricao}>Consultar produtos e quantidades</Text>
-          </View>
-
-          <Text style={styles.seta}>›</Text>
-        </Pressable>
-
-        {/* Entradas - somente administrador */}
         {administrador && (
-          <Pressable style={styles.cardMenu} onPress={irParaEntradas}>
-            <View style={styles.iconeVerde}>
-              <PackagePlusIcon width={27} height={27} color="#ffffff" />
-            </View>
-
-            <View style={styles.textoMenu}>
-              <Text style={styles.menuTitulo}>Entradas</Text>
-
-              <Text style={styles.menuDescricao}>Registrar entrada de produtos</Text>
-            </View>
-
-            <Text style={styles.seta}>›</Text>
-          </Pressable>
+          <>
+            <Text style={[styles.secao, { color: cores.texto }]}>Gestão</Text>
+            <Pressable
+              onPress={irParaUsuarios}
+              style={[styles.gestao, { backgroundColor: cores.card, borderColor: cores.borda }]}
+            >
+              <View style={styles.iconeGestao}>
+                <UserPlusIcon width={24} height={24} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.cardTitulo, { color: cores.texto }]}>Usuários</Text>
+                <Text style={{ color: cores.secundario }}>Cadastrar e gerenciar usuários</Text>
+              </View>
+              <Text style={{ fontSize: 25, color: cores.secundario }}>›</Text>
+            </Pressable>
+          </>
         )}
-
-        {/* Requisições - todos os usuários */}
-        <Pressable style={styles.cardMenu} onPress={irParaSaidas}>
-          <View style={styles.iconeLaranja}>
-            <SendIcon width={27} height={27} color="#ffffff" />
-          </View>
-
-          <View style={styles.textoMenu}>
-            <Text style={styles.menuTitulo}>Requisições</Text>
-
-            <Text style={styles.menuDescricao}>Registrar retirada de produtos</Text>
-          </View>
-
-          <Text style={styles.seta}>›</Text>
-        </Pressable>
-
-        {/* Usuários - somente administrador */}
-        {administrador && (
-          <Pressable style={styles.cardMenu} onPress={irParaUsuarios}>
-            <View style={styles.iconeRoxo}>
-              <UserPlusIcon width={27} height={27} color="#ffffff" />
-            </View>
-
-            <View style={styles.textoMenu}>
-              <Text style={styles.menuTitulo}>Usuários</Text>
-
-              <Text style={styles.menuDescricao}>Cadastrar usuários do sistema</Text>
-            </View>
-
-            <Text style={styles.seta}>›</Text>
-          </Pressable>
-        )}
-
-        {/* Rodapé */}
-        <Text style={styles.rodape}>Sistema de Almoxarifado • 2026</Text>
       </ScrollView>
+
+      <Modal transparent visible={menuAberto} animationType="fade" onRequestClose={() => setMenuAberto(false)}>
+        <Pressable style={styles.sobreposicao} onPress={() => setMenuAberto(false)}>
+          <View style={[styles.menuConta, { backgroundColor: cores.card }]}>
+            <Text style={[styles.menuCabecalho, { color: cores.secundario }]}>MINHA CONTA</Text>
+            <Text style={[styles.menuNome, { color: cores.texto }]}>{usuario?.nome || "Usuário"}</Text>
+            <Text style={[styles.menuPerfil, { color: cores.secundario }]}>{perfil}</Text>
+            <Pressable style={styles.linha} onPress={() => aviso("Meu perfil")}>
+              <Text style={[styles.opcao, { color: cores.texto }]}>👤   Meu perfil</Text>
+            </Pressable>
+            <Pressable style={styles.linha} onPress={() => aviso("Alterar senha")}>
+              <Text style={[styles.opcao, { color: cores.texto }]}>🔒   Alterar senha</Text>
+            </Pressable>
+            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setPreferencias(true); }}>
+              <Text style={[styles.opcao, { color: cores.texto }]}>⚙️   Preferências</Text>
+            </Pressable>
+            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); voltarParaLogin(); }}>
+              <Text style={[styles.opcao, { color: "#DC2626" }]}>↪   Sair do sistema</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal transparent visible={preferencias} animationType="fade" onRequestClose={() => setPreferencias(false)}>
+        <View style={styles.sobreposicao}>
+          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
+            <Text style={[styles.secao, { color: cores.texto }]}>Preferências</Text>
+            <Text style={[styles.descricao, { color: cores.secundario }]}>Aparência do SIA-Mobile</Text>
+            <BotaoTema escuro={escuro} aoPressionar={alternarTema} />
+            <Pressable style={styles.fechar} onPress={() => setPreferencias(false)}>
+              <Text style={styles.fecharTexto}>Concluir</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Fundo principal
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-
-  // Espaçamento
-  conteudo: {
-    paddingHorizontal: 20,
-    paddingTop: 55,
-    paddingBottom: 35,
-  },
-
-  // Cabeçalho
-  cabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 25,
-  },
-
-  // Ícone igual ao Login
-  logo: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-
-  areaTitulo: {
-    flex: 1,
-  },
-
-  titulo: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#0f172a",
-  },
-
-  subtitulo: {
-    fontSize: 13,
-    color: "#64748b",
-    marginTop: 2,
-  },
-
-  // Botão sair
-  botaoSair: {
-    width: 43,
-    height: 43,
-    borderRadius: 12,
-    backgroundColor: "#e2e8f0",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // Boas-vindas
-  cardBoasVindas: {
-    backgroundColor: "#1e40af",
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 28,
-  },
-
-  textoBemVindo: {
-    fontSize: 14,
-    color: "#bfdbfe",
-  },
-
-  nomeUsuario: {
-    fontSize: 23,
-    fontWeight: "bold",
-    color: "#ffffff",
-    marginTop: 4,
-  },
-
-  // Perfil como texto, sem aparência de botão
-  textoPerfil: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#bfdbfe",
-    marginTop: 10,
-  },
-
-  // Acesso rápido
-  tituloSecao: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0f172a",
-    marginBottom: 14,
-  },
-
-  // Cards dos menus
-  cardMenu: {
-    minHeight: 82,
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 15,
-    marginBottom: 13,
-    flexDirection: "row",
-    alignItems: "center",
-
-    shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-
-  // Estoque
-  iconeAzul: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "#2563eb",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-
-  // Entradas
-  iconeVerde: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "#16a34a",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-
-  // Requisições
-  iconeLaranja: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "#ea580c",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-
-  // Usuários
-  iconeRoxo: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: "#7c3aed",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-
-  textoMenu: {
-    flex: 1,
-  },
-
-  menuTitulo: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0f172a",
-  },
-
-  menuDescricao: {
-    fontSize: 13,
-    color: "#64748b",
-    marginTop: 3,
-  },
-
-  seta: {
-    fontSize: 30,
-    color: "#94a3b8",
-    marginLeft: 8,
-  },
-
-  // Rodapé
-  rodape: {
-    textAlign: "center",
-    color: "#94a3b8",
-    fontSize: 12,
-    marginTop: 18,
-  },
+  container: { flex: 1 },
+  conteudo: { paddingHorizontal: 20, paddingTop: 46, paddingBottom: 28 },
+  cabecalho: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
+  logo: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  titulos: { flex: 1, marginLeft: 12 },
+  titulo: { fontSize: 24, fontWeight: "800" },
+  avatar: { width: 46, height: 46, borderWidth: 1, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  boasVindas: { padding: 22, borderRadius: 20, marginBottom: 26 },
+  saudacao: { color: "#BFDBFE", fontSize: 14 },
+  nome: { color: "#FFFFFF", fontSize: 24, fontWeight: "800", marginTop: 5 },
+  perfil: { color: "#DBEAFE", marginTop: 8 },
+  secao: { fontSize: 18, fontWeight: "800", marginBottom: 13 },
+  card: { borderRadius: 17, borderWidth: 1, padding: 20, marginBottom: 25 },
+  cardTitulo: { fontSize: 15, fontWeight: "700", marginBottom: 5 },
+  descricao: { fontSize: 13, lineHeight: 21 },
+  gestao: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 16, borderWidth: 1, gap: 12 },
+  iconeGestao: { width: 46, height: 46, borderRadius: 13, backgroundColor: "#7C3AED", alignItems: "center", justifyContent: "center" },
+  sobreposicao: { flex: 1, backgroundColor: "#00000088", justifyContent: "center", padding: 20 },
+  menuConta: { borderRadius: 18, paddingVertical: 12, paddingHorizontal: 18, maxWidth: 420, width: "100%", alignSelf: "center" },
+  menuCabecalho: { fontSize: 11, fontWeight: "700", letterSpacing: 1.3, marginTop: 10 },
+  menuNome: { fontSize: 19, fontWeight: "800", marginTop: 12 },
+  menuPerfil: { fontSize: 13, marginBottom: 12 },
+  linha: { paddingVertical: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#94A3B866" },
+  opcao: { fontSize: 15, fontWeight: "600" },
+  preferencias: { borderRadius: 20, padding: 22, maxWidth: 420, width: "100%", alignSelf: "center" },
+  fechar: { alignItems: "center", marginTop: 18, paddingVertical: 12 },
+  fecharTexto: { color: "#3B82F6", fontWeight: "700" },
 });
