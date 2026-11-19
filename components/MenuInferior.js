@@ -6,18 +6,20 @@ import BlocksIcon from "../assets/icons/blocks.svg";
 import ClipboardListIcon from "../assets/icons/clipboard-list.svg";
 import PackagePlusIcon from "../assets/icons/package-plus.svg";
 import SendIcon from "../assets/icons/send.svg";
+import UserPlusIcon from "../assets/icons/user-plus.svg";
 
 const ITENS = [
   { tela: "Inicio", titulo: "Início", Icone: BlocksIcon },
   { tela: "Estoque", titulo: "Estoque", Icone: ClipboardListIcon },
   { tela: "Entradas", titulo: "Entradas", Icone: PackagePlusIcon },
   { tela: "Saidas", titulo: "Saídas", Icone: SendIcon },
+  { tela: "Usuarios", titulo: "Usuários", Icone: UserPlusIcon },
 ];
 
 export default function MenuInferior({ telaAtual, usuario, navegar, escuro = false }) {
   const insets = useSafeAreaInsets();
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
-  const itens = ITENS.filter((item) => administrador || item.tela !== "Entradas");
+  const itens = ITENS.filter((item) => administrador || (item.tela !== "Entradas" && item.tela !== "Usuarios"));
   const indice = Math.max(0, itens.findIndex((item) => item.tela === telaAtual));
 
   const [largura, setLargura] = useState(0);
@@ -120,7 +122,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   rotulo: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
     color: "#CBD5E1",
   },
