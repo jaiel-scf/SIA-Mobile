@@ -147,7 +147,7 @@ export default function Login({ entrar }) {
       });
 
       if (resposta.status === 401 || resposta.status === 403) {
-        Alert.alert("Erro", "E-mail ou senha incorretos.");
+        setMensagemLogin("E-mail ou senha incorretos.");
         return;
       }
 
@@ -163,15 +163,14 @@ export default function Login({ entrar }) {
 
       Keyboard.dismiss();
 
-      setMensagemLogin("Login realizado com sucesso.");
+      setMensagemLogin("");
 
       entrar(dadosUsuario);
     } catch (erro) {
       console.error("Erro ao fazer login:", erro);
 
-      Alert.alert(
-        "Erro",
-        erro.message === "Network request failed"
+      setMensagemLogin(
+        erro.message === "Network request failed" || erro.message === "Failed to fetch"
           ? "Não foi possível conectar ao servidor."
           : erro.message,
       );
@@ -288,10 +287,8 @@ export default function Login({ entrar }) {
               )}
 
               {!!mensagemLogin && (
-                <View style={styles.caixaLoginSucesso}>
-                  <Text style={styles.textoLoginSucesso}>
-                    ✓ {mensagemLogin}
-                  </Text>
+                <View style={styles.caixaLoginErro}>
+                  <Text style={styles.textoLoginErro}>{mensagemLogin}</Text>
                 </View>
               )}
 
@@ -555,17 +552,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  caixaLoginSucesso: {
-    backgroundColor: "#dcfce7",
+  caixaLoginErro: {
+    backgroundColor: "#fef2f2",
     borderWidth: 1,
-    borderColor: "#bbf7d0",
+    borderColor: "#fecaca",
     borderRadius: 8,
     padding: 10,
     marginTop: 14,
   },
 
-  textoLoginSucesso: {
-    color: "#166534",
+  textoLoginErro: {
+    color: "#b91c1c",
     fontSize: 13,
     fontWeight: "600",
     textAlign: "center",
