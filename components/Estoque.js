@@ -319,9 +319,6 @@ export default function Estoque({ usuario, voltar }) {
     return nomeProduto.includes(termo) || codigoProduto.includes(termo);
   });
 
-  const semCusto = produtos.filter((produto) => custoMedio(produto) === null).length;
-  const valorTotal = produtos.reduce((total, produto) => total + (custoMedio(produto) ?? 0) * Number(produto.quantidade ?? 0), 0);
-
   // Calcula as páginas
   const totalPaginas = Math.ceil(produtosFiltrados.length / PRODUTOS_POR_PAGINA);
 
@@ -405,25 +402,6 @@ export default function Estoque({ usuario, voltar }) {
           <TextInput style={styles.pesquisa} placeholder="Digite o nome ou SKU..."
             placeholderTextColor="#94a3b8" value={pesquisa} onChangeText={pesquisarProdutos} />
         </View>
-        {administrador && !carregando && !erro && (
-          <View style={styles.resumo}>
-            <View style={styles.resumoCard}>
-              <Text style={styles.resumoRotulo}>Produtos cadastrados</Text>
-              <Text style={styles.resumoNumero}>{produtos.length}</Text>
-              <Text style={styles.resumoNota}>Quantidade de itens ativos</Text>
-            </View>
-            <View style={styles.resumoCard}>
-              <Text style={styles.resumoRotulo}>Valor total do estoque</Text>
-              <Text style={[styles.resumoNumero, { color: "#1d4ed8" }]}>{moeda(valorTotal)}</Text>
-              <Text style={styles.resumoNota}>Produtos com custo informado</Text>
-            </View>
-            <View style={styles.resumoCard}>
-              <Text style={styles.resumoRotulo}>Produtos sem custo médio</Text>
-              <Text style={[styles.resumoNumero, { color: "#d97706" }]}>{semCusto}</Text>
-              <Text style={styles.resumoNota}>Precisam de custo de aquisição informado</Text>
-            </View>
-          </View>
-        )}
         <View style={styles.tituloLista}>
           <Text style={styles.tituloSecao}>Relação de produtos</Text>
           <Text style={styles.descricaoSecao}>Acompanhamento da disponibilidade dos materiais.</Text>
@@ -688,11 +666,6 @@ const styles = StyleSheet.create({
   tituloSecao: { fontSize: 16, fontWeight: "700", color: "#1e293b" },
   descricaoSecao: { fontSize: 12, color: "#64748b", marginTop: 5, marginBottom: 16 },
   tituloLista: { backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e7edf5", borderRadius: 16, padding: 18, marginBottom: 12 },
-  resumo: { gap: 10, marginBottom: 16 },
-  resumoCard: { backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e7edf5", borderRadius: 16, padding: 18 },
-  resumoRotulo: { fontSize: 13, color: "#64748b", fontWeight: "600" },
-  resumoNumero: { fontSize: 24, color: "#0f172a", fontWeight: "800", marginTop: 8 },
-  resumoNota: { fontSize: 11, color: "#94a3b8", marginTop: 4 },
   rodape: { fontSize: 11, textAlign: "center", color: "#94a3b8", marginTop: 22 },
   cabecalho: {
     flexDirection: "row",
