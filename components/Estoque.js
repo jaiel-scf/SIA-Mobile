@@ -5,13 +5,20 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { useFocusEffect } from "@react-navigation/native";
 
 import { API_URL } from "../config/api";
+import { LinearGradient } from "expo-linear-gradient";
+import PackageIcon from "../assets/icons/package (1).svg";
 
 import ClipboardListIcon from "../assets/icons/clipboard-list.svg";
 import ArrowDownIcon from "../assets/icons/circle-arrow-down.svg";
 import ArrowRightIcon from "../assets/icons/circle-arrow-right.svg";
 import ArrowUpIcon from "../assets/icons/circle-arrow-up.svg";
 
-const PRODUTOS_POR_PAGINA = 3;
+const PRODUTOS_POR_PAGINA = 5;
+const moeda = (valor) => Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const custoMedio = (produto) => {
+  const valor = produto.custoMedio ?? produto.custoMedioUnitario;
+  return valor == null || valor === "" || !Number.isFinite(Number(valor)) ? null : Number(valor);
+};
 
 const unidades = {
   UNIDADE: "Unidade",
@@ -312,6 +319,9 @@ export default function Estoque({ usuario, voltar }) {
     return nomeProduto.includes(termo) || codigoProduto.includes(termo);
   });
 
+  const semCusto = produtos.filter((produto) => custoMedio(produto) === null).length;
+  const valorTotal = produtos.reduce((total, produto) => total + (custoMedio(produto) ?? 0) * Number(produto.quantidade ?? 0), 0);
+
   // Calcula as páginas
   const totalPaginas = Math.ceil(produtosFiltrados.length / PRODUTOS_POR_PAGINA);
 
@@ -373,14 +383,13 @@ export default function Estoque({ usuario, voltar }) {
           <Text style={styles.textoVoltar}>‹</Text>
         </Pressable>
 
-        <View style={styles.caixaIcone}>
-          <ClipboardListIcon width={27} height={27} color="#ffffff" />
-        </View>
-
-        <View>
+        <LinearGradient colors={["#1d4ed8", "#60a5fa"]} style={styles.caixaIcone}>
+          <PackageIcon width={27} height={27} color="#ffffff" />
+        </LinearGradient>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.etiqueta}>GESTÃO DE MATERIAIS</Text>
           <Text style={styles.titulo}>Estoque</Text>
-
-          <Text style={styles.subtitulo}>Produtos cadastrados</Text>
+          <Text style={styles.subtitulo}>Consulte e acompanhe os produtos do estoque</Text>
         </View>
       </View>
 
@@ -389,14 +398,36 @@ export default function Estoque({ usuario, voltar }) {
         contentContainerStyle={styles.lista}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Campo de pesquisa */}
-        <TextInput
-          style={styles.pesquisa}
-          placeholder="Buscar produto ou código"
-          placeholderTextColor="#94a3b8"
-          value={pesquisa}
-          onChangeText={pesquisarProdutos}
-        />
+        <View style={styles.painelPesquisa}>
+          <Text style={styles.tituloSecao}>Produtos cadastrados</Text>
+          <Text style={styles.descricaoSecao}>Pesquise pelo nome ou código SKU do produto.</Text>
+          <Text style={styles.label}>Buscar produto</Text>
+          <TextInput style={styles.pesquisa} placeholder="Digite o nome ou SKU..."
+            placeholderTextColor="#94a3b8" value={pesquisa} onChangeText={pesquisarProdutos} />
+        </View>
+        {administrador && !carregando && !erro && (
+          <View style={styles.resumo}>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoRotulo}>Produtos cadastrados</Text>
+              <Text style={styles.resumoNumero}>{produtos.length}</Text>
+              <Text style={styles.resumoNota}>Quantidade de itens ativos</Text>
+            </View>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoRotulo}>Valor total do estoque</Text>
+              <Text style={[styles.resumoNumero, { color: "#1d4ed8" }]}>{moeda(valorTotal)}</Text>
+              <Text style={styles.resumoNota}>Produtos com custo informado</Text>
+            </View>
+            <View style={styles.resumoCard}>
+              <Text style={styles.resumoRotulo}>Produtos sem custo médio</Text>
+              <Text style={[styles.resumoNumero, { color: "#d97706" }]}>{semCusto}</Text>
+              <Text style={styles.resumoNota}>Precisam de custo de aquisição informado</Text>
+            </View>
+          </View>
+        )}
+        <View style={styles.tituloLista}>
+          <Text style={styles.tituloSecao}>Relação de produtos</Text>
+          <Text style={styles.descricaoSecao}>Acompanhamento da disponibilidade dos materiais.</Text>
+        </View>
 
         {/* Carregamento */}
         {carregando && <Text style={styles.aviso}>Carregando estoque...</Text>}
@@ -512,11 +543,18 @@ export default function Estoque({ usuario, voltar }) {
                     <Text style={styles.rotulo}>Localização: {produto.localizacao}</Text>
                   )}
 
-                  <Text style={styles.codigoProduto}>Código: {produto.codigo || "-"}</Text>
+                  <Text style={styles.codigoProduto}>SKU: {produto.codigo || "-"}</Text>
 
                   <Text style={styles.rotulo}>
                     Unidade: {unidades[produto.unidadeMedida] || produto.unidadeMedida || "-"}
                   </Text>
+
+                  {administrador && (
+                    <>
+                      <Text style={styles.rotulo}>Custo médio: {custoMedio(produto) === null ? "Não informado" : moeda(custoMedio(produto))}</Text>
+                      <Text style={styles.rotulo}>Valor total: {custoMedio(produto) === null ? "—" : moeda(custoMedio(produto) * Number(produto.quantidade ?? 0))}</Text>
+                    </>
+                  )}
 
                   {/* Edição e exclusão somente para administrador */}
                   {administrador && (
@@ -631,6 +669,7 @@ export default function Estoque({ usuario, voltar }) {
             </View>
           </View>
         )}
+        <Text style={styles.rodape}>Sistema de Almoxarifado • SIA • 2026</Text>
       </ScrollView>
     </View>
   );
@@ -639,11 +678,22 @@ export default function Estoque({ usuario, voltar }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
-    paddingHorizontal: 20,
-    paddingTop: 55,
+    backgroundColor: "#f4f7fc",
+    paddingHorizontal: 18,
+    paddingTop: 30,
   },
 
+  etiqueta: { fontSize: 10, fontWeight: "800", letterSpacing: 1.5, color: "#2563eb", marginBottom: 3 },
+  painelPesquisa: { backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e7edf5", borderRadius: 16, padding: 18, marginBottom: 16 },
+  tituloSecao: { fontSize: 16, fontWeight: "700", color: "#1e293b" },
+  descricaoSecao: { fontSize: 12, color: "#64748b", marginTop: 5, marginBottom: 16 },
+  tituloLista: { backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e7edf5", borderRadius: 16, padding: 18, marginBottom: 12 },
+  resumo: { gap: 10, marginBottom: 16 },
+  resumoCard: { backgroundColor: "#ffffff", borderWidth: 1, borderColor: "#e7edf5", borderRadius: 16, padding: 18 },
+  resumoRotulo: { fontSize: 13, color: "#64748b", fontWeight: "600" },
+  resumoNumero: { fontSize: 24, color: "#0f172a", fontWeight: "800", marginTop: 8 },
+  resumoNota: { fontSize: 11, color: "#94a3b8", marginTop: 4 },
+  rodape: { fontSize: 11, textAlign: "center", color: "#94a3b8", marginTop: 22 },
   cabecalho: {
     flexDirection: "row",
     alignItems: "center",
@@ -701,7 +751,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 15,
     color: "#0f172a",
-    marginBottom: 20,
+    marginBottom: 0,
   },
 
   // Formulário de edição
