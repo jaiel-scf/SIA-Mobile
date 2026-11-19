@@ -78,6 +78,15 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
     borda: escuro ? "#2B3B54" : "#E7EDF5",
   };
 
+  function fecharModalSenha() {
+    if (alterandoSenha) return;
+    setSenhaAberta(false);
+    setSenhaAtual("");
+    setNovaSenha("");
+    setConfirmarSenha("");
+    setSenhasVisiveis({});
+  }
+
   async function salvarSenha() {
     if (!senhaAtual || novaSenha.length < 6) {
       notificar("Dados inválidos", "Informe a senha atual e uma nova senha com pelo menos 6 caracteres.");
@@ -201,9 +210,10 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
         </View>
       </Modal>
 
-      <Modal transparent visible={senhaAberta} animationType="fade" onRequestClose={() => !alterandoSenha && setSenhaAberta(false)}>
-        <Pressable style={styles.sobreposicao} onPress={() => {}} accessibilityRole="none">
-          <Pressable style={[styles.preferencias, { backgroundColor: cores.card }]} onPress={(evento) => evento.stopPropagation()}>
+      <Modal transparent visible={senhaAberta} animationType="fade" onRequestClose={fecharModalSenha}>
+        <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={fecharModalSenha} accessibilityRole="button" accessibilityLabel="Fechar alteração de senha" />
+          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
             <Text style={[styles.secao, { color: cores.texto }]}>Alterar senha</Text>
             {[
               ["Senha atual", senhaAtual, setSenhaAtual],
@@ -224,16 +234,14 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
                 </View>
               </View>
             ))}
-            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={(evento) => { evento.stopPropagation(); salvarSenha(); }}>
+            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={salvarSenha}>
               <Text style={styles.salvarPerfilTexto}>{alterandoSenha ? "Salvando..." : "Alterar senha"}</Text>
             </Pressable>
-            <Pressable disabled={alterandoSenha} style={styles.fechar} onPress={() => {
-              setSenhaAberta(false); setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
-            }}>
+            <Pressable disabled={alterandoSenha} style={styles.fechar} onPress={fecharModalSenha}>
               <Text style={styles.fecharTexto}>Cancelar</Text>
             </Pressable>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <Modal transparent visible={!!mensagem} animationType="fade" onRequestClose={() => setMensagem(null)}>
