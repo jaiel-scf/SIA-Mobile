@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { API_URL } from "../config/api";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,6 +9,7 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [atualizacao, setAtualizacao] = useState(0);
+  const [modalEstoque, setModalEstoque] = useState(false);
 
   const carregar = useCallback(async (ativo) => {
     setCarregando(true);
@@ -39,15 +40,25 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
         throw new Error("O servidor retornou dados em formato inesperado.");
       }
 
-      const estoqueBaixo = produtos.filter((produto) => {
-        const quantidade = Number(produto.quantidade);
-        const minimo = Number(produto.estoqueMinimo);
-        return Number.isFinite(quantidade) && Number.isFinite(minimo) && quantidade <= minimo;
-      }).length;
+      // Mesmas faixas de classificação utilizadas pelo SIA Web.
+      const alertas = produtos.map((produto) => {
+        const quantidade = Number(produto.quantidade ?? 0);
+        const minimo = Number(produto.estoqueMinimo ?? 0);
+        if (!Number.isFinite(quantidade) || !Number.isFinite(minimo)) return null;
+        const status = minimo <= 0
+          ? (quantidade <= 0 ? "Crítico" : "Normal")
+          : quantidade <= minimo ? "Crítico"
+          : quantidade <= minimo * 1.5 ? "Baixo" : "Normal";
+        return status === "Normal" ? null : { ...produto, quantidade, minimo, status };
+      }).filter(Boolean).sort((a, b) =>
+        (a.status === "Crítico" ? 0 : 1) - (b.status === "Crítico" ? 0 : 1) ||
+        String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR")
+      );
+      const estoqueBaixo = alertas.length;
 
       if (ativo()) {
         setDados({
-          produtos: produtos.length, estoqueBaixo, requisicoes: requisicoes.length,
+          produtos: produtos.length, estoqueBaixo, alertas, requisicoes: requisicoes.length,
           valorTotal: produtos.reduce((soma, p) => {
             const custo = p.custoMedio;
             return soma + (custo == null || custo === "" || !Number.isFinite(Number(custo)) || Number(custo) < 0 ? 0 : Number(custo) * Number(p.quantidade ?? 0));
@@ -100,7 +111,7 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
   const moeda = (valor) => Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const indicadores = [
     { titulo: "Produtos cadastrados", valor: dados?.produtos, descricao: "Itens ativos no almoxarifado", icone: "▦", cor: "#2563EB", suave: "#DBEAFE" },
-    { titulo: "Estoque baixo", valor: dados?.estoqueBaixo, descricao: "Itens no limite ou abaixo do mínimo", icone: "!", cor: "#EA580C", suave: "#FFEDD5" },
+    { titulo: "Estoque baixo", valor: dados?.estoqueBaixo, descricao: "Toque para consultar os produtos", icone: "!", cor: "#EA580C", suave: "#FFEDD5" },
     { titulo: "Requisições", valor: dados?.requisicoes, descricao: "Registros disponíveis para seu perfil", icone: "≡", cor: "#7C3AED", suave: "#EDE9FE" },
     ...(administrador ? [{ titulo: "Sem custo médio", valor: dados?.semCusto, descricao: "Produtos sem custo informado", icone: "R$", cor: "#D97706", suave: "#FEF3C7" }] : []),
   ];
@@ -122,14 +133,14 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
       )}
       <View style={styles.cartoes}>
         {indicadores.map((item) => (
-          <View key={item.titulo} style={[styles.cartao, { backgroundColor: fundo, borderColor: borda }]}>
+          <Pressable key={item.titulo} disabled={item.titulo !== "Estoque baixo"} onPress={() => setModalEstoque(true)} accessibilityRole={item.titulo === "Estoque baixo" ? "button" : undefined} accessibilityLabel={item.titulo === "Estoque baixo" ? "Ver produtos com estoque baixo ou crítico" : undefined} style={[styles.cartao, { backgroundColor: fundo, borderColor: borda }]}>
             <View style={[styles.icone, { backgroundColor: escuro ? "#253550" : item.suave }]}>
               <Text style={[styles.iconeTexto, { color: item.cor }]}>{item.icone}</Text>
             </View>
             <Text style={[styles.numero, { color: texto }]}>{item.valor}</Text>
             <Text style={[styles.rotulo, { color: texto }]}>{item.titulo}</Text>
             <Text style={[styles.descricao, { color: secundario }]}>{item.descricao}</Text>
-          </View>
+          </Pressable>
         ))}
       </View>
       <View style={[styles.saude, { backgroundColor: fundo, borderColor: borda }]}>
@@ -147,12 +158,69 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
           {dados.estoqueBaixo} de {dados.produtos} produtos precisam de atenção
         </Text>
       </View>
+      <Modal visible={modalEstoque} transparent animationType="fade" onRequestClose={() => setModalEstoque(false)}>
+        <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalEstoque(false)} accessibilityLabel="Fechar lista de alertas" />
+          <View style={[styles.modal, { backgroundColor: fundo, borderColor: borda }]}>
+            <View style={styles.modalTopo}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.modalTitulo, { color: texto }]}>Atenção ao estoque</Text>
+                <Text style={[styles.descricao, { color: secundario }]}>Produtos com status crítico ou baixo</Text>
+              </View>
+              <Pressable onPress={() => setModalEstoque(false)} accessibilityRole="button" accessibilityLabel="Fechar" style={styles.fecharModal}>
+                <Text style={{ color: secundario, fontSize: 24 }}>×</Text>
+              </Pressable>
+            </View>
+            <ScrollView style={styles.modalLista} contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
+              {dados.alertas.length === 0 ? (
+                <Text style={[styles.vazio, { color: secundario }]}>Nenhum produto com estoque baixo ou crítico.</Text>
+              ) : dados.alertas.map((produto) => {
+                const critico = produto.status === "Crítico";
+                const cor = critico ? "#DC2626" : "#A16207";
+                return (
+                  <View key={String(produto.id ?? produto.codigo)} style={[styles.alertaProduto, { borderColor: borda }]}>
+                    <View style={styles.alertaProdutoTopo}>
+                      <Text style={[styles.produtoNome, { color: texto }]}>{produto.nome}</Text>
+                      <View style={[styles.seloStatus, { backgroundColor: critico ? "#FEE2E2" : "#FEF3C7" }]}>
+                        <Text style={{ color: cor, fontSize: 11, fontWeight: "700" }}>{produto.status}</Text>
+                      </View>
+                    </View>
+                    <Text style={[styles.descricao, { color: secundario }]}>SKU: {produto.codigo || "—"}</Text>
+                    <View style={styles.quantidades}>
+                      <Text style={[styles.quantidadeTexto, { color: texto }]}>Atual: {produto.quantidade}</Text>
+                      <Text style={[styles.quantidadeTexto, { color: secundario }]}>Mínimo: {produto.minimo}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <Pressable style={styles.botaoFechar} onPress={() => setModalEstoque(false)}>
+              <Text style={styles.botaoFecharTexto}>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   grade: { gap: 14, paddingBottom: 12 },
+  sobreposicao: { flex: 1, backgroundColor: "#0F172A99", alignItems: "center", justifyContent: "center", padding: 18 },
+  modal: { width: "100%", maxWidth: 520, maxHeight: "85%", borderRadius: 20, borderWidth: 1, padding: 20 },
+  modalTopo: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 },
+  modalTitulo: { fontSize: 20, fontWeight: "800" },
+  fecharModal: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
+  modalLista: { flexGrow: 0 },
+  vazio: { paddingVertical: 24, textAlign: "center" },
+  alertaProduto: { borderWidth: 1, borderRadius: 14, padding: 14, marginBottom: 10 },
+  alertaProdutoTopo: { flexDirection: "row", alignItems: "center", gap: 10 },
+  produtoNome: { fontSize: 14, fontWeight: "700", flex: 1 },
+  seloStatus: { paddingHorizontal: 9, paddingVertical: 6, borderRadius: 12 },
+  quantidades: { flexDirection: "row", gap: 20, marginTop: 10 },
+  quantidadeTexto: { fontSize: 12, fontWeight: "600" },
+  botaoFechar: { marginTop: 14, backgroundColor: "#2563EB", paddingVertical: 13, borderRadius: 12, alignItems: "center" },
+  botaoFecharTexto: { color: "#FFFFFF", fontWeight: "700" },
   destaque: { borderRadius: 20, padding: 22, minHeight: 174 },
   destaqueTopo: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   destaqueEtiqueta: { color: "#DBEAFE", fontSize: 10, fontWeight: "800", letterSpacing: 1.5 },
