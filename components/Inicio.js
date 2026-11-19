@@ -26,6 +26,16 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
   const [mensagem, setMensagem] = useState(null);
   const notificar = (titulo, descricao) => setMensagem({ titulo, descricao });
 
+  function fecharPerfil() {
+    if (salvando) return;
+    setMeuPerfilAberto(false);
+    setNomeEditado(nomeAtual);
+  }
+
+  function fecharPreferencias() {
+    setPreferencias(false);
+  }
+
   async function salvarPerfil() {
     const nome = nomeEditado.trim();
     if (nome.length < 3 || nome.length > 120) {
@@ -160,7 +170,8 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
       </ScrollView>
 
       <Modal transparent visible={menuAberto} animationType="fade" onRequestClose={() => setMenuAberto(false)}>
-        <Pressable style={styles.sobreposicao} onPress={() => setMenuAberto(false)}>
+        <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setMenuAberto(false)} accessibilityRole="button" accessibilityLabel="Fechar menu" />
           <View style={[styles.menuConta, { backgroundColor: cores.card }]}>
             <Text style={[styles.menuCabecalho, { color: cores.secundario }]}>MINHA CONTA</Text>
             <Text style={[styles.menuNome, { color: cores.texto }]}>{nomeAtual}</Text>
@@ -178,11 +189,12 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
               <Text style={[styles.opcao, { color: "#DC2626" }]}>↪   Sair do sistema</Text>
             </Pressable>
           </View>
-        </Pressable>
+        </View>
       </Modal>
 
-      <Modal transparent visible={meuPerfilAberto} animationType="fade" onRequestClose={() => !salvando && setMeuPerfilAberto(false)}>
+      <Modal transparent visible={meuPerfilAberto} animationType="fade" onRequestClose={fecharPerfil}>
         <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={fecharPerfil} accessibilityRole="button" accessibilityLabel="Fechar janela" />
           <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
             <Text style={[styles.secao, { color: cores.texto }]}>Meu perfil</Text>
             <Text style={[styles.campoRotulo, { color: cores.secundario }]}>Nome completo</Text>
@@ -203,7 +215,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
             <Pressable disabled={salvando} style={styles.salvarPerfil} onPress={salvarPerfil}>
               <Text style={styles.salvarPerfilTexto}>{salvando ? "Salvando..." : "Salvar alterações"}</Text>
             </Pressable>
-            <Pressable disabled={salvando} style={styles.fechar} onPress={() => setMeuPerfilAberto(false)}>
+            <Pressable disabled={salvando} style={styles.fechar} onPress={fecharPerfil}>
               <Text style={styles.fecharTexto}>Cancelar</Text>
             </Pressable>
           </View>
@@ -246,6 +258,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
 
       <Modal transparent visible={!!mensagem} animationType="fade" onRequestClose={() => setMensagem(null)}>
         <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setMensagem(null)} accessibilityRole="button" accessibilityLabel="Fechar janela" />
           <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
             <Text style={[styles.secao, { color: cores.texto }]}>{mensagem?.titulo}</Text>
             <Text style={[styles.descricao, { color: cores.secundario }]}>{mensagem?.descricao}</Text>
@@ -256,13 +269,14 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
         </View>
       </Modal>
 
-      <Modal transparent visible={preferencias} animationType="fade" onRequestClose={() => setPreferencias(false)}>
+      <Modal transparent visible={preferencias} animationType="fade" onRequestClose={fecharPreferencias}>
         <View style={styles.sobreposicao}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={fecharPreferencias} accessibilityRole="button" accessibilityLabel="Fechar janela" />
           <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
             <Text style={[styles.secao, { color: cores.texto }]}>Preferências</Text>
             <Text style={[styles.descricao, { color: cores.secundario }]}>Aparência do SIA-Mobile</Text>
             <BotaoTema escuro={escuro} aoPressionar={alternarTema} />
-            <Pressable style={styles.fechar} onPress={() => setPreferencias(false)}>
+            <Pressable style={styles.fechar} onPress={fecharPreferencias}>
               <Text style={styles.fecharTexto}>Concluir</Text>
             </Pressable>
           </View>
