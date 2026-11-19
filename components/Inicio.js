@@ -3,6 +3,8 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { LinearGradient } from "expo-linear-gradient";
 
 import BlocksIcon from "../assets/icons/blocks.svg";
+import EyeIcon from "../assets/icons/eye.svg";
+import EyeOffIcon from "../assets/icons/eye-off.svg";
 import BotaoTema from "./BotaoTema";
 import CartaoBoasVindas from "./CartaoBoasVindas";
 import IndicadoresDashboard from "./IndicadoresDashboard";
@@ -217,7 +219,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
                   <Pressable onPress={() => setSenhasVisiveis((anterior) => ({ ...anterior, [rotulo]: !anterior[rotulo] }))}
                     accessibilityRole="button" accessibilityLabel={senhasVisiveis[rotulo] ? "Ocultar senha" : "Mostrar senha"}
                     style={styles.botaoVisibilidade}>
-                    <Text style={{ fontSize: 19 }}>{senhasVisiveis[rotulo] ? "🙈" : "👁️"}</Text>
+                    {senhasVisiveis[rotulo] ? <EyeOffIcon width={20} height={20} color={cores.secundario} /> : <EyeIcon width={20} height={20} color={cores.secundario} />}
                   </Pressable>
                 </View>
               </View>
