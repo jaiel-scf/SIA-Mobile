@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import BlocksIcon from "../assets/icons/blocks.svg";
@@ -15,15 +15,22 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
   const [nomeAtual, setNomeAtual] = useState(usuario?.nome || "Usuário");
   const [nomeEditado, setNomeEditado] = useState(nomeAtual);
   const [salvando, setSalvando] = useState(false);
+  const [senhaAberta, setSenhaAberta] = useState(false);
+  const [senhaAtual, setSenhaAtual] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [alterandoSenha, setAlterandoSenha] = useState(false);
+  const [mensagem, setMensagem] = useState(null);
+  const notificar = (titulo, descricao) => setMensagem({ titulo, descricao });
 
   async function salvarPerfil() {
     const nome = nomeEditado.trim();
     if (nome.length < 3 || nome.length > 120) {
-      Alert.alert("Nome inválido", "Informe um nome entre 3 e 120 caracteres.");
+      notificar("Nome inválido", "Informe um nome entre 3 e 120 caracteres.");
       return;
     }
     if (!usuario?.token) {
-      Alert.alert("Sessão expirada", "Faça login novamente.");
+      notificar("Sessão expirada", "Faça login novamente.");
       return;
     }
     if (nome === nomeAtual) {
@@ -50,9 +57,9 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
       setNomeAtual(nomeSalvo);
       usuario.nome = nomeSalvo;
       setMeuPerfilAberto(false);
-      Alert.alert("Perfil atualizado", "Seu nome foi salvo com sucesso.");
+      notificar("Perfil atualizado", "Seu nome foi salvo com sucesso.");
     } catch (erro) {
-      Alert.alert("Erro", erro.message);
+      notificar("Erro", erro.message);
     } finally {
       setSalvando(false);
     }
@@ -68,9 +75,48 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
     borda: escuro ? "#2B3B54" : "#E7EDF5",
   };
 
-  function aviso(titulo) {
-    setMenuAberto(false);
-    Alert.alert(titulo, "Estamos verificando a integração segura com o backend antes de liberar esta função.");
+  async function salvarSenha() {
+    if (!senhaAtual || novaSenha.length < 6) {
+      notificar("Dados inválidos", "Informe a senha atual e uma nova senha com pelo menos 6 caracteres.");
+      return;
+    }
+    if (novaSenha !== confirmarSenha) {
+      notificar("Confirmação inválida", "As novas senhas não coincidem.");
+      return;
+    }
+    if (senhaAtual === novaSenha) {
+      notificar("Senha inválida", "A nova senha deve ser diferente da atual.");
+      return;
+    }
+    if (!usuario?.token) {
+      notificar("Sessão expirada", "Faça login novamente.");
+      return;
+    }
+    setAlterandoSenha(true);
+    try {
+      const resposta = await fetch(`${API_URL}/usuarios/me/senha`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${usuario.token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ senhaAtual, novaSenha }),
+      });
+      if (!resposta.ok) {
+        const mensagens = {
+          400: "Senha atual incorreta ou nova senha inválida.",
+          401: "Sessão expirada. Faça login novamente.",
+          403: "Acesso não permitido.",
+        };
+        throw new Error(mensagens[resposta.status] || "Não foi possível alterar a senha.");
+      }
+      setSenhaAberta(false);
+      setSenhaAtual("");
+      setNovaSenha("");
+      setConfirmarSenha("");
+      notificar("Senha alterada", "Sua senha foi atualizada com sucesso.");
+    } catch (erro) {
+      notificar("Erro", erro.message);
+    } finally {
+      setAlterandoSenha(false);
+    }
   }
 
   return (
@@ -110,7 +156,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
             <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setNomeEditado(nomeAtual); setMeuPerfilAberto(true); }}>
               <Text style={[styles.opcao, { color: cores.texto }]}>👤   Meu perfil</Text>
             </Pressable>
-            <Pressable style={styles.linha} onPress={() => aviso("Alterar senha")}>
+            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setSenhaAberta(true); }}>
               <Text style={[styles.opcao, { color: cores.texto }]}>🔒   Alterar senha</Text>
             </Pressable>
             <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setPreferencias(true); }}>
@@ -147,6 +193,46 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
             </Pressable>
             <Pressable disabled={salvando} style={styles.fechar} onPress={() => setMeuPerfilAberto(false)}>
               <Text style={styles.fecharTexto}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={senhaAberta} animationType="fade" onRequestClose={() => !alterandoSenha && setSenhaAberta(false)}>
+        <View style={styles.sobreposicao}>
+          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
+            <Text style={[styles.secao, { color: cores.texto }]}>Alterar senha</Text>
+            {[
+              ["Senha atual", senhaAtual, setSenhaAtual],
+              ["Nova senha (mínimo 6 caracteres)", novaSenha, setNovaSenha],
+              ["Confirmar nova senha", confirmarSenha, setConfirmarSenha],
+            ].map(([rotulo, valor, alterar]) => (
+              <View key={rotulo}>
+                <Text style={[styles.campoRotulo, { color: cores.secundario }]}>{rotulo}</Text>
+                <TextInput style={[styles.campoPerfil, { color: cores.texto, borderColor: cores.borda }]}
+                  value={valor} onChangeText={alterar} secureTextEntry editable={!alterandoSenha}
+                  autoCapitalize="none" />
+              </View>
+            ))}
+            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={salvarSenha}>
+              <Text style={styles.salvarPerfilTexto}>{alterandoSenha ? "Salvando..." : "Alterar senha"}</Text>
+            </Pressable>
+            <Pressable disabled={alterandoSenha} style={styles.fechar} onPress={() => {
+              setSenhaAberta(false); setSenhaAtual(""); setNovaSenha(""); setConfirmarSenha("");
+            }}>
+              <Text style={styles.fecharTexto}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={!!mensagem} animationType="fade" onRequestClose={() => setMensagem(null)}>
+        <View style={styles.sobreposicao}>
+          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
+            <Text style={[styles.secao, { color: cores.texto }]}>{mensagem?.titulo}</Text>
+            <Text style={[styles.descricao, { color: cores.secundario }]}>{mensagem?.descricao}</Text>
+            <Pressable style={styles.fechar} onPress={() => setMensagem(null)}>
+              <Text style={styles.fecharTexto}>Entendi</Text>
             </Pressable>
           </View>
         </View>
