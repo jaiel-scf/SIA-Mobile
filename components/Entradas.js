@@ -99,7 +99,11 @@ export default function Entradas({ usuario, voltar }) {
       const campo = findNodeHandle(observacaoRef.current);
 
       if (campo && scrollRef.current) {
-        scrollRef.current.scrollResponderScrollNativeHandleToKeyboard(campo, 100, true);
+        scrollRef.current.scrollResponderScrollNativeHandleToKeyboard(
+          campo,
+          100,
+          true,
+        );
       }
     }, 350);
   }
@@ -149,14 +153,20 @@ export default function Entradas({ usuario, voltar }) {
 
       // Organiza em ordem alfabética
       const ordenados = [...dados].sort((a, b) =>
-        String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR", { sensitivity: "base" }),
+        String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR", {
+          sensitivity: "base",
+        }),
       );
 
       setProdutos(ordenados);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
 
-      setErro(error.message === "Network request failed" ? "Não foi possível conectar ao servidor." : error.message);
+      setErro(
+        error.message === "Network request failed"
+          ? "Não foi possível conectar ao servidor."
+          : error.message,
+      );
     } finally {
       setCarregando(false);
     }
@@ -215,7 +225,11 @@ export default function Entradas({ usuario, voltar }) {
   }
 
   // Registra a movimentação no backend
-  async function registrarMovimentacao(produtoId, quantidadeEntrada, observacaoEntrada) {
+  async function registrarMovimentacao(
+    produtoId,
+    quantidadeEntrada,
+    observacaoEntrada,
+  ) {
     const resposta = await fetch(`${API_URL}/movimentacoes/registrar`, {
       method: "POST",
       headers: {
@@ -251,7 +265,10 @@ export default function Entradas({ usuario, voltar }) {
     setMensagemSucesso("");
 
     if (!produtoSelecionado || !quantidadeValida(quantidade)) {
-      Alert.alert("Erro", "Selecione um produto e informe uma quantidade inteira maior que zero.");
+      Alert.alert(
+        "Erro",
+        "Selecione um produto e informe uma quantidade inteira maior que zero.",
+      );
       return;
     }
 
@@ -260,7 +277,9 @@ export default function Entradas({ usuario, voltar }) {
       return;
     }
 
-    const produto = produtos.find((item) => String(item.id) === String(produtoSelecionado));
+    const produto = produtos.find(
+      (item) => String(item.id) === String(produtoSelecionado),
+    );
 
     if (!produto) {
       Alert.alert("Erro", "Produto não encontrado.");
@@ -270,7 +289,11 @@ export default function Entradas({ usuario, voltar }) {
     setSalvando(true);
 
     try {
-      await registrarMovimentacao(produto.id, Number(quantidade), observacao.trim());
+      await registrarMovimentacao(
+        produto.id,
+        Number(quantidade),
+        observacao.trim(),
+      );
 
       adicionarHistorico(produto.nome, Number(quantidade), "Entrada");
 
@@ -286,7 +309,9 @@ export default function Entradas({ usuario, voltar }) {
 
       Alert.alert(
         "Erro",
-        error.message === "Network request failed" ? "Não foi possível conectar ao servidor." : error.message,
+        error.message === "Network request failed"
+          ? "Não foi possível conectar ao servidor."
+          : error.message,
       );
     } finally {
       setSalvando(false);
@@ -324,7 +349,10 @@ export default function Entradas({ usuario, voltar }) {
     }
 
     if (!quantidadeValida(quantidadeInicial)) {
-      Alert.alert("Erro", "Digite uma quantidade inicial inteira maior que zero.");
+      Alert.alert(
+        "Erro",
+        "Digite uma quantidade inicial inteira maior que zero.",
+      );
       return;
     }
 
@@ -334,7 +362,9 @@ export default function Entradas({ usuario, voltar }) {
     }
 
     // Verifica código duplicado
-    const codigoExiste = produtos.some((produto) => String(produto.codigo ?? "").toUpperCase() === codigo);
+    const codigoExiste = produtos.some(
+      (produto) => String(produto.codigo ?? "").toUpperCase() === codigo,
+    );
 
     if (codigoExiste) {
       Alert.alert("Erro", "Já existe um produto cadastrado com esse código.");
@@ -377,12 +407,18 @@ export default function Entradas({ usuario, voltar }) {
       const produtoCriado = await resposta.json();
 
       if (!produtoCriado?.id) {
-        throw new Error("Produto cadastrado, mas o servidor não retornou seu identificador.");
+        throw new Error(
+          "Produto cadastrado, mas o servidor não retornou seu identificador.",
+        );
       }
 
       // Registra a quantidade recebida
       try {
-        await registrarMovimentacao(produtoCriado.id, quantidadeRecebida, observacao.trim());
+        await registrarMovimentacao(
+          produtoCriado.id,
+          quantidadeRecebida,
+          observacao.trim(),
+        );
       } catch (error) {
         setProdutos((anteriores) => [produtoCriado, ...anteriores]);
 
@@ -404,7 +440,9 @@ export default function Entradas({ usuario, voltar }) {
       limparNovoProduto();
 
       setTipoEntrada("existente");
-      setMensagemSucesso("Produto cadastrado e entrada registrada com sucesso!");
+      setMensagemSucesso(
+        "Produto cadastrado e entrada registrada com sucesso!",
+      );
 
       await carregarProdutos();
     } catch (error) {
@@ -421,7 +459,9 @@ export default function Entradas({ usuario, voltar }) {
     }
   }
 
-  const produtoAtual = produtos.find((produto) => String(produto.id) === String(produtoSelecionado));
+  const produtoAtual = produtos.find(
+    (produto) => String(produto.id) === String(produtoSelecionado),
+  );
 
   const bloqueado = salvando || carregando || !administrador || !!erro;
 
@@ -457,7 +497,9 @@ export default function Entradas({ usuario, voltar }) {
           keyboardDismissMode="on-drag"
           automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
         >
-          {carregando && <Text style={styles.aviso}>Carregando produtos...</Text>}
+          {carregando && (
+            <Text style={styles.aviso}>Carregando produtos...</Text>
+          )}
 
           {!!erro && (
             <View style={styles.caixaErro}>
@@ -479,20 +521,37 @@ export default function Entradas({ usuario, voltar }) {
               <View style={styles.areaTipos}>
                 <Pressable
                   disabled={salvando}
-                  style={[styles.botaoTipo, tipoEntrada === "existente" && styles.botaoTipoSelecionado]}
+                  style={[
+                    styles.botaoTipo,
+                    tipoEntrada === "existente" && styles.botaoTipoSelecionado,
+                  ]}
                   onPress={() => mudarTipoEntrada("existente")}
                 >
-                  <Text style={[styles.textoTipo, tipoEntrada === "existente" && styles.textoTipoSelecionado]}>
+                  <Text
+                    style={[
+                      styles.textoTipo,
+                      tipoEntrada === "existente" &&
+                        styles.textoTipoSelecionado,
+                    ]}
+                  >
                     Produto existente
                   </Text>
                 </Pressable>
 
                 <Pressable
                   disabled={salvando}
-                  style={[styles.botaoTipo, tipoEntrada === "novo" && styles.botaoTipoSelecionado]}
+                  style={[
+                    styles.botaoTipo,
+                    tipoEntrada === "novo" && styles.botaoTipoSelecionado,
+                  ]}
                   onPress={() => mudarTipoEntrada("novo")}
                 >
-                  <Text style={[styles.textoTipo, tipoEntrada === "novo" && styles.textoTipoSelecionado]}>
+                  <Text
+                    style={[
+                      styles.textoTipo,
+                      tipoEntrada === "novo" && styles.textoTipoSelecionado,
+                    ]}
+                  >
                     Novo produto
                   </Text>
                 </Pressable>
@@ -508,16 +567,28 @@ export default function Entradas({ usuario, voltar }) {
                     style={styles.seletor}
                     onPress={() => setMostrarProdutos(!mostrarProdutos)}
                   >
-                    <Text style={[styles.textoSeletor, !produtoAtual && styles.placeholder]} numberOfLines={1}>
+                    <Text
+                      style={[
+                        styles.textoSeletor,
+                        !produtoAtual && styles.placeholder,
+                      ]}
+                      numberOfLines={1}
+                    >
                       {produtoAtual ? produtoAtual.nome : "Selecionar produto"}
                     </Text>
 
-                    <Text style={styles.setaSeletor}>{mostrarProdutos ? "▲" : "▼"}</Text>
+                    <Text style={styles.setaSeletor}>
+                      {mostrarProdutos ? "▲" : "▼"}
+                    </Text>
                   </Pressable>
 
                   {mostrarProdutos && (
                     <View style={styles.listaProdutos}>
-                      {produtos.length === 0 && <Text style={styles.avisoLista}>Nenhum produto cadastrado.</Text>}
+                      {produtos.length === 0 && (
+                        <Text style={styles.avisoLista}>
+                          Nenhum produto cadastrado.
+                        </Text>
+                      )}
 
                       {produtos.map((produto) => (
                         <Pressable
@@ -528,9 +599,13 @@ export default function Entradas({ usuario, voltar }) {
                             setMostrarProdutos(false);
                           }}
                         >
-                          <Text style={styles.produtoOpcaoTexto}>{produto.nome}</Text>
+                          <Text style={styles.produtoOpcaoTexto}>
+                            {produto.nome}
+                          </Text>
 
-                          <Text style={styles.produtoCodigo}>Código: {produto.codigo || "-"}</Text>
+                          <Text style={styles.produtoCodigo}>
+                            Código: {produto.codigo || "-"}
+                          </Text>
                         </Pressable>
                       ))}
                     </View>
@@ -616,9 +691,18 @@ export default function Entradas({ usuario, voltar }) {
                         key={valor}
                         disabled={salvando}
                         onPress={() => setNovaUnidade(valor)}
-                        style={[styles.botaoUnidade, novaUnidade === valor && styles.unidadeSelecionada]}
+                        style={[
+                          styles.botaoUnidade,
+                          novaUnidade === valor && styles.unidadeSelecionada,
+                        ]}
                       >
-                        <Text style={[styles.textoUnidade, novaUnidade === valor && styles.textoUnidadeSelecionada]}>
+                        <Text
+                          style={[
+                            styles.textoUnidade,
+                            novaUnidade === valor &&
+                              styles.textoUnidadeSelecionada,
+                          ]}
+                        >
                           {rotulo}
                         </Text>
                       </Pressable>
@@ -676,18 +760,33 @@ export default function Entradas({ usuario, voltar }) {
               <View style={styles.areaBotoes}>
                 <Pressable
                   disabled={bloqueado}
-                  style={[styles.botaoSalvar, bloqueado && styles.botaoDesabilitado]}
-                  onPress={tipoEntrada === "existente" ? salvarEntradaExistente : salvarNovoProduto}
+                  style={[
+                    styles.botaoSalvar,
+                    bloqueado && styles.botaoDesabilitado,
+                  ]}
+                  onPress={
+                    tipoEntrada === "existente"
+                      ? salvarEntradaExistente
+                      : salvarNovoProduto
+                  }
                 >
                   <Text style={styles.textoBotaoSalvar}>
-                    {salvando ? "Salvando..." : tipoEntrada === "existente" ? "Salvar entrada" : "Cadastrar produto"}
+                    {salvando
+                      ? "Salvando..."
+                      : tipoEntrada === "existente"
+                        ? "Salvar entrada"
+                        : "Cadastrar produto"}
                   </Text>
                 </Pressable>
 
                 <Pressable
                   disabled={salvando}
                   style={styles.botaoLimpar}
-                  onPress={tipoEntrada === "existente" ? limparEntradaExistente : limparNovoProduto}
+                  onPress={
+                    tipoEntrada === "existente"
+                      ? limparEntradaExistente
+                      : limparNovoProduto
+                  }
                 >
                   <Text style={styles.textoBotaoLimpar}>Limpar</Text>
                 </Pressable>
@@ -706,7 +805,9 @@ export default function Entradas({ usuario, voltar }) {
             <Text style={styles.cardTitulo}>Últimas entradas</Text>
 
             {ultimasEntradas.length === 0 && (
-              <Text style={styles.semEntrada}>Nenhuma entrada registrada nesta sessão.</Text>
+              <Text style={styles.semEntrada}>
+                Nenhuma entrada registrada nesta sessão.
+              </Text>
             )}
 
             {ultimasEntradas.map((entrada) => (
@@ -714,9 +815,15 @@ export default function Entradas({ usuario, voltar }) {
                 <View style={styles.dadosEntrada}>
                   <Text style={styles.entradaProduto}>{entrada.produto}</Text>
 
-                  <Text style={styles.entradaQuantidade}>+{entrada.quantidade} unidades</Text>
+                  <Text style={styles.entradaQuantidade}>
+                    +{entrada.quantidade} unidades
+                  </Text>
 
-                  {entrada.tipo === "Novo produto" && <Text style={styles.novoProdutoHistorico}>Novo produto</Text>}
+                  {entrada.tipo === "Novo produto" && (
+                    <Text style={styles.novoProdutoHistorico}>
+                      Novo produto
+                    </Text>
+                  )}
                 </View>
 
                 <Text style={styles.entradaData}>{entrada.data}</Text>

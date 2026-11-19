@@ -23,22 +23,18 @@ import EyeIcon from "../assets/icons/eye.svg";
 import EyeOffIcon from "../assets/icons/eye-off.svg";
 
 export default function Login({ entrar }) {
-  // Dados do login
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  // Recuperação de senha
   const [modalRecuperacao, setModalRecuperacao] = useState(false);
   const [emailRecuperacao, setEmailRecuperacao] = useState("");
   const [mensagemRecuperacao, setMensagemRecuperacao] = useState("");
 
-  // Mensagens e carregamento
   const [mensagemLogin, setMensagemLogin] = useState("");
   const [entrando, setEntrando] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
 
-  // Abre o card de recuperação
   function abrirRecuperacao() {
     Keyboard.dismiss();
 
@@ -48,7 +44,6 @@ export default function Login({ entrar }) {
     setModalRecuperacao(true);
   }
 
-  // Fecha o card de recuperação
   function fecharRecuperacao() {
     if (recuperando) return;
 
@@ -58,7 +53,6 @@ export default function Login({ entrar }) {
     setMensagemRecuperacao("");
   }
 
-  // Solicita a recuperação de senha ao backend
   async function recuperarSenha() {
     if (recuperando) return;
 
@@ -93,7 +87,6 @@ export default function Login({ entrar }) {
         throw new Error("Não foi possível solicitar a recuperação de senha.");
       }
 
-      // O backend pode responder com uma mensagem JSON
       const textoResposta = await resposta.text();
 
       let dados = {};
@@ -102,12 +95,13 @@ export default function Login({ entrar }) {
         try {
           dados = JSON.parse(textoResposta);
         } catch (error) {
-          // Se a resposta não for JSON, usamos a mensagem padrão.
+          // Utiliza a mensagem padrão quando a resposta não é JSON.
         }
       }
 
       setMensagemRecuperacao(
-        dados.mensagem || "Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.",
+        dados.mensagem ||
+          "Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.",
       );
 
       Keyboard.dismiss();
@@ -116,14 +110,15 @@ export default function Login({ entrar }) {
 
       Alert.alert(
         "Erro",
-        erro.message === "Network request failed" ? "Não foi possível conectar ao servidor." : erro.message,
+        erro.message === "Network request failed"
+          ? "Não foi possível conectar ao servidor."
+          : erro.message,
       );
     } finally {
       setRecuperando(false);
     }
   }
 
-  // Faz o login usando o backend
   async function fazerLogin() {
     if (entrando) return;
 
@@ -166,21 +161,19 @@ export default function Login({ entrar }) {
         throw new Error("O servidor não retornou uma sessão válida.");
       }
 
-      // Fecha o teclado antes de navegar
       Keyboard.dismiss();
 
       setMensagemLogin("Login realizado com sucesso.");
 
-      // Entrega os dados ao App.js, que decide
-      // se o usuário vai para o Início ou para
-      // a redefinição obrigatória de senha.
       entrar(dadosUsuario);
     } catch (erro) {
       console.error("Erro ao fazer login:", erro);
 
       Alert.alert(
         "Erro",
-        erro.message === "Network request failed" ? "Não foi possível conectar ao servidor." : erro.message,
+        erro.message === "Network request failed"
+          ? "Não foi possível conectar ao servidor."
+          : erro.message,
       );
     } finally {
       setEntrando(false);
@@ -189,8 +182,10 @@ export default function Login({ entrar }) {
 
   return (
     <>
-      {/* Fundo e teclado da tela Login */}
-      <LinearGradient colors={["#0f172a", "#1e3a8a", "#1d4ed8"]} style={styles.container}>
+      <LinearGradient
+        colors={["#0f172a", "#1e40af", "#0369a1"]}
+        style={styles.container}
+      >
         <KeyboardAvoidingView
           style={styles.areaTeclado}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -204,33 +199,39 @@ export default function Login({ entrar }) {
             keyboardDismissMode="none"
             automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
           >
-            {/* Card principal do Login */}
             <View style={styles.card}>
-              <LinearGradient colors={["#2563eb", "#38bdf8"]} style={styles.logo}>
-                <BlocksIcon width={38} height={38} color="#ffffff" />
+              <LinearGradient
+                colors={["#2563eb", "#38bdf8"]}
+                style={styles.logo}
+              >
+                <BlocksIcon width={36} height={36} color="#ffffff" />
               </LinearGradient>
 
               <Text style={styles.titulo}>SIA</Text>
 
               <Text style={styles.subtitulo}>Sistema de Almoxarifado</Text>
 
-              {/* E-mail */}
+              <Text style={styles.descricao}>
+                Acesse sua conta para continuar
+              </Text>
+
               <Text style={styles.label}>E-mail</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="usuario@gmail.com"
-                placeholderTextColor="#94a3b8"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-                editable={!entrando}
-              />
+              <View style={styles.campo}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="usuario@gmail.com"
+                  placeholderTextColor="#94a3b8"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                  editable={!entrando}
+                />
+              </View>
 
-              {/* Senha */}
               <Text style={styles.label}>Senha</Text>
 
               <View style={styles.campoSenha}>
@@ -245,16 +246,18 @@ export default function Login({ entrar }) {
                   editable={!entrando}
                 />
 
-                <Pressable style={styles.botaoOlho} onPress={() => setMostrarSenha(!mostrarSenha)}>
+                <Pressable
+                  style={styles.botaoOlho}
+                  onPress={() => setMostrarSenha(!mostrarSenha)}
+                >
                   {mostrarSenha ? (
-                    <EyeOffIcon width={22} height={22} color="#64748b" />
+                    <EyeOffIcon width={21} height={21} color="#64748b" />
                   ) : (
-                    <EyeIcon width={22} height={22} color="#64748b" />
+                    <EyeIcon width={21} height={21} color="#64748b" />
                   )}
                 </Pressable>
               </View>
 
-              {/* Informações abaixo da senha */}
               <View style={styles.informacoes}>
                 <Text style={styles.textoSecundario}>Acesso ao sistema</Text>
 
@@ -263,34 +266,43 @@ export default function Login({ entrar }) {
                 </Pressable>
               </View>
 
-              {/* Botão Entrar */}
               <Pressable
                 disabled={entrando}
                 onPress={fazerLogin}
-                style={({ pressed }) => [styles.botaoEntrar, (pressed || entrando) && styles.botaoEntrarPressionado]}
+                style={({ pressed }) => [
+                  styles.botaoEntrar,
+                  (pressed || entrando) && styles.botaoEntrarPressionado,
+                ]}
               >
-                <Text style={styles.textoBotao}>{entrando ? "Entrando..." : "Entrar"}</Text>
+                <Text style={styles.textoBotao}>
+                  {entrando ? "Entrando..." : "Entrar"}
+                </Text>
               </Pressable>
 
               {entrando && (
                 <View style={styles.caixaEntrando}>
-                  <Text style={styles.textoEntrando}>Verificando seus dados...</Text>
+                  <Text style={styles.textoEntrando}>
+                    Verificando seus dados...
+                  </Text>
                 </View>
               )}
 
               {!!mensagemLogin && (
                 <View style={styles.caixaLoginSucesso}>
-                  <Text style={styles.textoLoginSucesso}>✓ {mensagemLogin}</Text>
+                  <Text style={styles.textoLoginSucesso}>
+                    ✓ {mensagemLogin}
+                  </Text>
                 </View>
               )}
 
-              <Text style={styles.rodape}>Acesso ao Sistema de Almoxarifado</Text>
+              <Text style={styles.rodape}>
+                Acesso ao Sistema de Almoxarifado
+              </Text>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </LinearGradient>
 
-      {/* Card de recuperação de senha */}
       <Modal
         visible={modalRecuperacao}
         transparent
@@ -312,13 +324,19 @@ export default function Login({ entrar }) {
             automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
           >
             <View style={styles.cardModal}>
-              <Pressable style={styles.botaoFechar} disabled={recuperando} onPress={fecharRecuperacao}>
+              <Pressable
+                style={styles.botaoFechar}
+                disabled={recuperando}
+                onPress={fecharRecuperacao}
+              >
                 <Text style={styles.textoFechar}>×</Text>
               </Pressable>
 
               <Text style={styles.tituloModal}>Recuperar senha</Text>
 
-              <Text style={styles.descricaoModal}>Informe seu e-mail para receber o link de redefinição de senha.</Text>
+              <Text style={styles.descricaoModal}>
+                Informe seu e-mail para receber o link de redefinição de senha.
+              </Text>
 
               <Text style={styles.label}>E-mail</Text>
 
@@ -336,16 +354,23 @@ export default function Login({ entrar }) {
 
               {!!mensagemRecuperacao && (
                 <View style={styles.caixaRecuperacao}>
-                  <Text style={styles.textoRecuperacao}>✓ {mensagemRecuperacao}</Text>
+                  <Text style={styles.textoRecuperacao}>
+                    ✓ {mensagemRecuperacao}
+                  </Text>
                 </View>
               )}
 
               <Pressable
                 disabled={recuperando}
                 onPress={recuperarSenha}
-                style={({ pressed }) => [styles.botaoEnviar, (pressed || recuperando) && styles.botaoEnviarPressionado]}
+                style={({ pressed }) => [
+                  styles.botaoEnviar,
+                  (pressed || recuperando) && styles.botaoEnviarPressionado,
+                ]}
               >
-                <Text style={styles.textoBotao}>{recuperando ? "Enviando..." : "Enviar e-mail"}</Text>
+                <Text style={styles.textoBotao}>
+                  {recuperando ? "Enviando..." : "Enviar e-mail"}
+                </Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -356,17 +381,14 @@ export default function Login({ entrar }) {
 }
 
 const styles = StyleSheet.create({
-  // Fundo principal
   container: {
     flex: 1,
   },
 
-  // Ajusta a tela à abertura do teclado
   areaTeclado: {
     flex: 1,
   },
 
-  // Permite a rolagem com o teclado aberto
   rolagemPrincipal: {
     flex: 1,
     width: "100%",
@@ -380,12 +402,11 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
 
-  // Card principal
   card: {
     width: "100%",
     maxWidth: 420,
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
+    backgroundColor: "#f8fafc",
+    borderRadius: 16,
     padding: 28,
 
     shadowColor: "#000000",
@@ -399,9 +420,9 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
+    width: 64,
+    height: 64,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     alignSelf: "center",
@@ -411,16 +432,24 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#1e40af",
     textAlign: "center",
   },
 
   subtitulo: {
     fontSize: 15,
-    color: "#64748b",
+    fontWeight: "500",
+    color: "#334155",
     textAlign: "center",
     marginTop: 5,
-    marginBottom: 30,
+  },
+
+  descricao: {
+    fontSize: 14,
+    color: "#64748b",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 28,
   },
 
   label: {
@@ -430,23 +459,27 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  input: {
+  campo: {
     height: 50,
     borderWidth: 1,
     borderColor: "#cbd5e1",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    color: "#0f172a",
+    borderRadius: 8,
     backgroundColor: "#ffffff",
     marginBottom: 18,
+  },
+
+  input: {
+    flex: 1,
+    paddingHorizontal: 15,
+    fontSize: 15,
+    color: "#0f172a",
   },
 
   campoSenha: {
     height: 50,
     borderWidth: 1,
     borderColor: "#cbd5e1",
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: "#ffffff",
     flexDirection: "row",
     alignItems: "center",
@@ -457,13 +490,13 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     paddingHorizontal: 15,
-    fontSize: 16,
+    fontSize: 15,
     color: "#0f172a",
   },
 
   botaoOlho: {
     height: "100%",
-    width: 50,
+    width: 48,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -488,15 +521,15 @@ const styles = StyleSheet.create({
   },
 
   botaoEntrar: {
-    height: 52,
-    borderRadius: 12,
+    height: 50,
+    borderRadius: 8,
     backgroundColor: "#2563eb",
     alignItems: "center",
     justifyContent: "center",
   },
 
   botaoEntrarPressionado: {
-    backgroundColor: "#1e40af",
+    backgroundColor: "#1d4ed8",
     opacity: 0.85,
   },
 
@@ -510,7 +543,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eff6ff",
     borderWidth: 1,
     borderColor: "#bfdbfe",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     marginTop: 14,
   },
@@ -526,7 +559,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dcfce7",
     borderWidth: 1,
     borderColor: "#bbf7d0",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     marginTop: 14,
   },
@@ -545,7 +578,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Fundo do modal de recuperação
   fundoModal: {
     flex: 1,
     backgroundColor: "rgba(15, 23, 42, 0.65)",
@@ -567,8 +599,8 @@ const styles = StyleSheet.create({
   cardModal: {
     width: "100%",
     maxWidth: 420,
-    backgroundColor: "#ffffff",
-    borderRadius: 22,
+    backgroundColor: "#f8fafc",
+    borderRadius: 16,
     padding: 26,
 
     shadowColor: "#000000",
@@ -617,9 +649,9 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: "#cbd5e1",
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 15,
-    fontSize: 16,
+    fontSize: 15,
     color: "#0f172a",
     backgroundColor: "#ffffff",
     marginBottom: 18,
@@ -629,7 +661,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#dcfce7",
     borderWidth: 1,
     borderColor: "#bbf7d0",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 12,
     marginBottom: 16,
   },
@@ -643,15 +675,15 @@ const styles = StyleSheet.create({
   },
 
   botaoEnviar: {
-    height: 52,
-    borderRadius: 12,
+    height: 50,
+    borderRadius: 8,
     backgroundColor: "#2563eb",
     alignItems: "center",
     justifyContent: "center",
   },
 
   botaoEnviarPressionado: {
-    backgroundColor: "#1e40af",
+    backgroundColor: "#1d4ed8",
     opacity: 0.85,
   },
 });

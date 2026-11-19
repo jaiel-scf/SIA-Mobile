@@ -8,7 +8,14 @@
     "ios": {
       "supportsTablet": true
     },
-    "android": {},
-    "web": {}
+    "android": {
+      "package": "com.jaielsantos.SIAMobile"
+    },
+    "web": {},
+    "extra": {
+      "eas": {
+        "projectId": "002a933b-9c3e-42ea-b715-7775bc2beca2"
+      }
+    }
   }
 }
