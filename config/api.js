@@ -1,2 +1,2 @@
-// Endereço local do backend do SIA
-export const API_URL = "http://10.227.18.42:8080";
+// Endereço público do backend do SIA no Render
+export const API_URL = "https://sia-backend3.onrender.com";
