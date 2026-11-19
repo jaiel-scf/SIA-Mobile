@@ -202,8 +202,8 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
       </Modal>
 
       <Modal transparent visible={senhaAberta} animationType="fade" onRequestClose={() => !alterandoSenha && setSenhaAberta(false)}>
-        <View style={styles.sobreposicao}>
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
+        <Pressable style={styles.sobreposicao} onPress={() => {}} accessibilityRole="none">
+          <Pressable style={[styles.preferencias, { backgroundColor: cores.card }]} onPress={(evento) => evento.stopPropagation()}>
             <Text style={[styles.secao, { color: cores.texto }]}>Alterar senha</Text>
             {[
               ["Senha atual", senhaAtual, setSenhaAtual],
@@ -214,7 +214,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
                 <Text style={[styles.campoRotulo, { color: cores.secundario }]}>{rotulo}</Text>
                 <View style={[styles.campoSenhaContainer, { borderColor: cores.borda }]}>
                   <TextInput style={[styles.campoSenhaInput, { color: cores.texto }]}
-                    value={valor} onChangeText={alterar} secureTextEntry={!senhasVisiveis[rotulo]}
+                    value={valor} onChangeText={alterar} onSubmitEditing={() => {}} blurOnSubmit={true} secureTextEntry={!senhasVisiveis[rotulo]}
                     editable={!alterandoSenha} autoCapitalize="none" />
                   <Pressable onPress={() => setSenhasVisiveis((anterior) => ({ ...anterior, [rotulo]: !anterior[rotulo] }))}
                     accessibilityRole="button" accessibilityLabel={senhasVisiveis[rotulo] ? "Ocultar senha" : "Mostrar senha"}
@@ -224,7 +224,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
                 </View>
               </View>
             ))}
-            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={salvarSenha}>
+            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={(evento) => { evento.stopPropagation(); salvarSenha(); }}>
               <Text style={styles.salvarPerfilTexto}>{alterandoSenha ? "Salvando..." : "Alterar senha"}</Text>
             </Pressable>
             <Pressable disabled={alterandoSenha} style={styles.fechar} onPress={() => {
@@ -232,8 +232,8 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
             }}>
               <Text style={styles.fecharTexto}>Cancelar</Text>
             </Pressable>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       <Modal transparent visible={!!mensagem} animationType="fade" onRequestClose={() => setMensagem(null)}>
