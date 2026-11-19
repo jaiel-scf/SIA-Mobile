@@ -10,7 +10,7 @@ import CartaoBoasVindas from "./CartaoBoasVindas";
 import IndicadoresDashboard from "./IndicadoresDashboard";
 import { API_URL } from "../config/api";
 
-export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema }) {
+export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema, irParaEstoque, irParaSaidas }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [preferencias, setPreferencias] = useState(false);
   const [meuPerfilAberto, setMeuPerfilAberto] = useState(false);
@@ -165,7 +165,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
         <CartaoBoasVindas nome={nomeAtual} perfil={perfil} />
 
         <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
-        <IndicadoresDashboard usuario={usuario} escuro={escuro} />
+        <IndicadoresDashboard usuario={usuario} escuro={escuro} irParaEstoque={irParaEstoque} irParaSaidas={irParaSaidas} />
 
       </ScrollView>
 
