@@ -25,7 +25,7 @@ function TelaComMenu({ navigation, usuario, telaAtual, escuro, children }) {
         escuro={escuro}
         usuario={usuario}
         navegar={(tela) => {
-          if (tela === "Entradas" && String(usuario?.perfil ?? "").toLowerCase() !== "admin") {
+          if ((tela === "Entradas" || tela === "Usuarios") && String(usuario?.perfil ?? "").toLowerCase() !== "admin") {
             return;
           }
           navigation.navigate(tela, { usuario });
@@ -156,9 +156,19 @@ export default function App() {
           )}
         </Stack.Screen>
 
-        {/* Usuários */}
+        {/* Usuários - somente administrador */}
         <Stack.Screen name="Usuarios">
-          {({ navigation, route }) => <Usuarios usuario={route.params?.usuario} voltar={() => navigation.goBack()} />}
+          {({ navigation, route }) => {
+            const usuario = route.params?.usuario;
+            if (String(usuario?.perfil ?? "").toLowerCase() !== "admin") {
+              return <Inicio usuario={usuario} voltarParaLogin={() => navigation.replace("Login")} escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)} />;
+            }
+            return (
+              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Usuarios" escuro={escuro}>
+                <Usuarios usuario={usuario} voltar={() => navigation.goBack()} />
+              </TelaComMenu>
+            );
+          }}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
