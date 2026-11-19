@@ -4,12 +4,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import { API_URL } from "../config/api";
 import { LinearGradient } from "expo-linear-gradient";
 
-export default function IndicadoresDashboard({ usuario, escuro }) {
+export default function IndicadoresDashboard({ usuario, escuro, irParaEstoque, irParaSaidas }) {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [atualizacao, setAtualizacao] = useState(0);
   const [modalEstoque, setModalEstoque] = useState(false);
+  const [modalSemCusto, setModalSemCusto] = useState(false);
 
   const carregar = useCallback(async (ativo) => {
     setCarregando(true);
@@ -64,6 +65,7 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
             return soma + (custo == null || custo === "" || !Number.isFinite(Number(custo)) || Number(custo) < 0 ? 0 : Number(custo) * Number(p.quantidade ?? 0));
           }, 0),
           semCusto: produtos.filter((p) => p.custoMedio == null || p.custoMedio === "" || !Number.isFinite(Number(p.custoMedio)) || Number(p.custoMedio) < 0).length,
+          produtosSemCusto: produtos.filter((p) => p.custoMedio == null || p.custoMedio === "" || !Number.isFinite(Number(p.custoMedio)) || Number(p.custoMedio) < 0).sort((a, b) => String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR")),
         });
       }
     } catch (error) {
@@ -110,10 +112,10 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
   const percentualBaixo = dados?.produtos ? Math.round(dados.estoqueBaixo / dados.produtos * 100) : 0;
   const moeda = (valor) => Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const indicadores = [
-    { titulo: "Produtos cadastrados", valor: dados?.produtos, descricao: "Itens ativos no almoxarifado", icone: "▦", cor: "#2563EB", suave: "#DBEAFE" },
-    { titulo: "Estoque baixo", valor: dados?.estoqueBaixo, descricao: "Toque para consultar os produtos", icone: "!", cor: "#EA580C", suave: "#FFEDD5" },
-    { titulo: "Requisições", valor: dados?.requisicoes, descricao: "Registros disponíveis para seu perfil", icone: "≡", cor: "#7C3AED", suave: "#EDE9FE" },
-    ...(administrador ? [{ titulo: "Sem custo médio", valor: dados?.semCusto, descricao: "Produtos sem custo informado", icone: "R$", cor: "#D97706", suave: "#FEF3C7" }] : []),
+    { titulo: "Produtos cadastrados", valor: dados?.produtos, descricao: "Ver produtos ›", icone: "▦", cor: "#2563EB", suave: "#DBEAFE" },
+    { titulo: "Estoque baixo", valor: dados?.estoqueBaixo, descricao: "Ver alertas ›", icone: "!", cor: "#EA580C", suave: "#FFEDD5" },
+    { titulo: "Requisições", valor: dados?.requisicoes, descricao: "Ver requisições ›", icone: "≡", cor: "#7C3AED", suave: "#EDE9FE" },
+    ...(administrador ? [{ titulo: "Sem custo médio", valor: dados?.semCusto, descricao: "Ver produtos sem custo ›", icone: "R$", cor: "#D97706", suave: "#FEF3C7" }] : []),
   ];
 
   return (
@@ -133,7 +135,7 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
       )}
       <View style={styles.cartoes}>
         {indicadores.map((item) => (
-          <Pressable key={item.titulo} disabled={item.titulo !== "Estoque baixo"} onPress={() => setModalEstoque(true)} accessibilityRole={item.titulo === "Estoque baixo" ? "button" : undefined} accessibilityLabel={item.titulo === "Estoque baixo" ? "Ver produtos com estoque baixo ou crítico" : undefined} style={[styles.cartao, { backgroundColor: fundo, borderColor: borda }]}>
+          <Pressable key={item.titulo} onPress={() => { if (item.titulo === "Produtos cadastrados") irParaEstoque?.(); else if (item.titulo === "Requisições") irParaSaidas?.(); else if (item.titulo === "Estoque baixo") setModalEstoque(true); else if (item.titulo === "Sem custo médio" && administrador) setModalSemCusto(true); }} accessibilityRole="button" accessibilityLabel={item.descricao} style={[styles.cartao, { backgroundColor: fundo, borderColor: borda }]}>
             <View style={[styles.icone, { backgroundColor: escuro ? "#253550" : item.suave }]}>
               <Text style={[styles.iconeTexto, { color: item.cor }]}>{item.icone}</Text>
             </View>
@@ -158,6 +160,38 @@ export default function IndicadoresDashboard({ usuario, escuro }) {
           {dados.estoqueBaixo} de {dados.produtos} produtos precisam de atenção
         </Text>
       </View>
+      {administrador && (
+        <Modal visible={modalSemCusto} transparent animationType="fade" onRequestClose={() => setModalSemCusto(false)}>
+          <View style={styles.sobreposicao}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalSemCusto(false)} accessibilityLabel="Fechar lista de produtos sem custo" />
+            <View style={[styles.modal, { backgroundColor: fundo, borderColor: borda }]}>
+              <View style={styles.modalTopo}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.modalTitulo, { color: texto }]}>Produtos sem custo médio</Text>
+                  <Text style={[styles.descricao, { color: secundario }]}>Itens que precisam de informação de custo</Text>
+                </View>
+                <Pressable onPress={() => setModalSemCusto(false)} accessibilityRole="button" accessibilityLabel="Fechar" style={styles.fecharModal}>
+                  <Text style={{ color: secundario, fontSize: 24 }}>×</Text>
+                </Pressable>
+              </View>
+              <ScrollView style={styles.modalLista} contentContainerStyle={{ paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
+                {dados.produtosSemCusto.length === 0 ? (
+                  <Text style={[styles.vazio, { color: secundario }]}>Todos os produtos possuem custo médio informado.</Text>
+                ) : dados.produtosSemCusto.map((produto, indice) => (
+                  <View key={String(produto.id ?? produto.codigo ?? indice)} style={[styles.alertaProduto, { borderColor: borda }]}>
+                    <Text style={[styles.produtoNome, { color: texto }]}>{produto.nome}</Text>
+                    <Text style={[styles.descricao, { color: secundario }]}>SKU: {produto.codigo || "—"}</Text>
+                    <Text style={[styles.descricao, { color: "#D97706" }]}>Custo médio não informado</Text>
+                  </View>
+                ))}
+              </ScrollView>
+              <Pressable style={styles.botaoFechar} onPress={() => setModalSemCusto(false)}>
+                <Text style={styles.botaoFecharTexto}>Fechar</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      )}
       <Modal visible={modalEstoque} transparent animationType="fade" onRequestClose={() => setModalEstoque(false)}>
         <View style={styles.sobreposicao}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setModalEstoque(false)} accessibilityLabel="Fechar lista de alertas" />
