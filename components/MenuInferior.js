@@ -14,7 +14,7 @@ const ITENS = [
   { tela: "Saidas", titulo: "Saídas", Icone: SendIcon },
 ];
 
-export default function MenuInferior({ telaAtual, usuario, navegar }) {
+export default function MenuInferior({ telaAtual, usuario, navegar, escuro = false }) {
   const insets = useSafeAreaInsets();
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
   const itens = ITENS.filter((item) => administrador || item.tela !== "Entradas");
@@ -48,7 +48,7 @@ export default function MenuInferior({ telaAtual, usuario, navegar }) {
   if (tecladoAberto) return null;
 
   return (
-    <View style={[styles.area, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+    <View style={[styles.area, { paddingBottom: Math.max(insets.bottom, 10), backgroundColor: escuro ? "#0B1220" : "#F4F7FC" }]}>
       <View style={styles.menu} onLayout={(evento) => setLargura(evento.nativeEvent.layout.width)}>
         {larguraIndicador > 0 && (
           <Animated.View
