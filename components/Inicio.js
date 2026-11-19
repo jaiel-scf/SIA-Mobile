@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import BlocksIcon from "../assets/icons/blocks.svg";
 import BotaoTema from "./BotaoTema";
+import CartaoBoasVindas from "./CartaoBoasVindas";
 
 export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema }) {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -45,11 +46,7 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema 
           </Pressable>
         </View>
 
-        <LinearGradient colors={["#1E40AF", "#2563EB"]} style={styles.boasVindas}>
-          <Text style={styles.saudacao}>Bem-vindo</Text>
-          <Text style={styles.nome}>{usuario?.nome || "Usuário"}</Text>
-          <Text style={styles.perfil}>{perfil}</Text>
-        </LinearGradient>
+        <CartaoBoasVindas nome={usuario?.nome || "Usuário"} perfil={perfil} />
 
         <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
         <View style={[styles.card, { backgroundColor: cores.card, borderColor: cores.borda }]}>
