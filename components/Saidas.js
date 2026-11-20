@@ -768,13 +768,15 @@ function ajustarObservacao() {
                       </View>
                     </View>
 
-                    <Text style={styles.dadoRequisicao}>Criado por: {buscarNomeUsuario(requisicao.usuarioId)}</Text>
+                    <Text style={styles.nomeProdutoRequisicao} numberOfLines={1}>
+                      {buscarNomeProduto(requisicao.produtoId)}
+                    </Text>
 
-                    <Text style={styles.dadoRequisicao}>Criação: {formatarData(requisicao.dataMovimentacao)}</Text>
-
-                    <Text style={styles.dadoRequisicao}>Atualizada: {formatarData(requisicao.dataAtualizada)}</Text>
-
-                    <Text style={styles.textoExibir}>Ver detalhes ›</Text>
+                    <View style={styles.resumoRequisicao}>
+                      <Text style={styles.dadoRequisicao}>Qtd.: {requisicao.quantidade}</Text>
+                      <Text style={styles.dadoRequisicao}>{formatarData(requisicao.dataMovimentacao)}</Text>
+                      <Text style={styles.textoExibir}>Detalhes ›</Text>
+                    </View>
                   </Pressable>
                 );
               })}
@@ -1404,7 +1406,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 6,
   },
 
   codigoRequisicao: {
@@ -1425,17 +1427,30 @@ const criarEstilos = (escuro) => StyleSheet.create({
     fontWeight: "bold",
   },
 
+  nomeProdutoRequisicao: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: escuro ? "#f1f5f9" : "#0f172a",
+    marginBottom: 8,
+  },
+
+  resumoRequisicao: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+
   dadoRequisicao: {
     fontSize: 13,
     color: escuro ? "#94a3b8" : "#64748b",
-    marginBottom: 5,
   },
 
   textoExibir: {
     fontSize: 13,
     color: escuro ? "#60a5fa" : "#2563eb",
     fontWeight: "600",
-    marginTop: 8,
   },
 
   areaPaginacao: {
