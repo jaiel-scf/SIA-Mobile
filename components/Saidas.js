@@ -96,7 +96,7 @@ function criarData(ano, mes, dia) {
 }
 
 // Calendário dos filtros
-function Calendario({ visivel, valor, fechar, selecionar }) {
+function Calendario({ visivel, valor, fechar, selecionar, styles }) {
   const dataInicial = valor ? new Date(`${valor}T12:00:00`) : new Date();
 
   const [mesAtual, setMesAtual] = useState(new Date(dataInicial.getFullYear(), dataInicial.getMonth(), 1));
@@ -190,7 +190,8 @@ function Calendario({ visivel, valor, fechar, selecionar }) {
   );
 }
 
-export default function Saidas({ usuario, voltar }) {
+export default function Saidas({ usuario, voltar, escuro = false }) {
+  const styles = criarEstilos(escuro);
   const formularioScrollRef = useRef(null);
   const observacaoRef = useRef(null);
 
@@ -1046,6 +1047,7 @@ function ajustarObservacao() {
       {/* Calendário dos filtros */}
       {calendarioAberto !== "" && (
         <Calendario
+          styles={styles}
           key={calendarioAberto}
           visivel
           valor={calendarioAberto === "criacao" ? filtroDataCriacao : filtroDataAtualizada}
@@ -1063,10 +1065,10 @@ function ajustarObservacao() {
   );
 }
 
-const styles = StyleSheet.create({
+const criarEstilos = (escuro) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0f172a",
+    backgroundColor: escuro ? "#0f172a" : "#f8fafc",
     paddingHorizontal: 20,
     paddingTop: 55,
   },
@@ -1081,7 +1083,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: "#243247",
+    backgroundColor: escuro ? "#243247" : "#e2e8f0",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -1089,7 +1091,7 @@ const styles = StyleSheet.create({
 
   textoVoltar: {
     fontSize: 32,
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     marginTop: -3,
   },
 
@@ -1110,12 +1112,12 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
   },
 
   subtitulo: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginTop: 2,
   },
 
@@ -1143,7 +1145,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 18,
     padding: 20,
     marginBottom: 18,
@@ -1160,26 +1162,26 @@ const styles = StyleSheet.create({
   cardTitulo: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginBottom: 20,
   },
 
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
     marginBottom: 8,
   },
 
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     paddingHorizontal: 14,
     fontSize: 15,
-    color: "#f1f5f9",
-    backgroundColor: "#172235",
+    color: escuro ? "#f1f5f9" : "#0f172a",
+    backgroundColor: escuro ? "#172235" : "#ffffff",
     marginBottom: 18,
   },
 
@@ -1187,12 +1189,12 @@ const styles = StyleSheet.create({
     minHeight: 95,
     maxHeight: 150,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    color: "#f1f5f9",
-    backgroundColor: "#172235",
+    color: escuro ? "#f1f5f9" : "#0f172a",
+    backgroundColor: escuro ? "#172235" : "#ffffff",
     textAlignVertical: "top",
     marginBottom: 20,
   },
@@ -1200,35 +1202,35 @@ const styles = StyleSheet.create({
   seletor: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 12,
-    backgroundColor: "#172235",
+    backgroundColor: escuro ? "#172235" : "#ffffff",
   },
 
   textoSelecionado: {
     flex: 1,
     fontSize: 15,
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginRight: 10,
   },
 
   placeholder: {
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
   },
 
   setaSeletor: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
   },
 
   listaProdutos: {
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     marginBottom: 18,
     overflow: "hidden",
@@ -1237,7 +1239,7 @@ const styles = StyleSheet.create({
 
   listaStatus: {
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     marginBottom: 18,
     overflow: "hidden",
@@ -1251,13 +1253,13 @@ const styles = StyleSheet.create({
 
   produtoOpcaoTexto: {
     fontSize: 15,
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
     fontWeight: "600",
   },
 
   produtoCodigo: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginTop: 4,
   },
 
@@ -1291,14 +1293,14 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoBotaoLimpar: {
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -1321,7 +1323,7 @@ const styles = StyleSheet.create({
 
   aviso: {
     textAlign: "center",
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 18,
   },
 
@@ -1339,17 +1341,17 @@ const styles = StyleSheet.create({
   },
 
   textoTentar: {
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     fontWeight: "600",
   },
 
   campoData: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     paddingHorizontal: 14,
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     marginBottom: 18,
     flexDirection: "row",
     alignItems: "center",
@@ -1358,12 +1360,12 @@ const styles = StyleSheet.create({
 
   textoCampoData: {
     fontSize: 15,
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
   },
 
   iconeCalendario: {
     fontSize: 23,
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
   },
 
   botaoLimparFiltros: {
@@ -1372,24 +1374,24 @@ const styles = StyleSheet.create({
   },
 
   textoLimparFiltros: {
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     fontWeight: "600",
     fontSize: 14,
   },
 
   semResultado: {
     fontSize: 14,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     paddingVertical: 10,
   },
 
   requisicaoItem: {
     borderWidth: 1,
-    borderColor: "#334155",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
   },
 
   linhaRequisicao: {
@@ -1404,7 +1406,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "bold",
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
   },
 
   status: {
@@ -1420,13 +1422,13 @@ const styles = StyleSheet.create({
 
   dadoRequisicao: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 5,
   },
 
   textoExibir: {
     fontSize: 13,
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     fontWeight: "600",
     marginTop: 8,
   },
@@ -1434,14 +1436,14 @@ const styles = StyleSheet.create({
   areaPaginacao: {
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#334155",
+    borderTopColor: escuro ? "#334155" : "#e2e8f0",
     paddingTop: 18,
     marginTop: 8,
   },
 
   textoPaginacao: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 12,
   },
 
@@ -1459,8 +1461,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#334155",
-    backgroundColor: "#1e293b",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1477,7 +1479,7 @@ const styles = StyleSheet.create({
   textoPagina: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
   },
 
   textoPaginaAtiva: {
@@ -1485,7 +1487,7 @@ const styles = StyleSheet.create({
   },
 
   pontosPagina: {
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     paddingHorizontal: 2,
   },
 
@@ -1501,7 +1503,7 @@ const styles = StyleSheet.create({
   cardModalDetalhes: {
     width: "100%",
     maxHeight: "90%",
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 8,
@@ -1518,7 +1520,7 @@ const styles = StyleSheet.create({
   cardModalFormulario: {
     width: "100%",
     maxHeight: "100%",
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 8,
@@ -1548,12 +1550,12 @@ const styles = StyleSheet.create({
   tituloDetalhes: {
     fontSize: 19,
     fontWeight: "bold",
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
   },
 
   subtituloDetalhes: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginTop: 5,
   },
 
@@ -1561,14 +1563,14 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 10,
-    backgroundColor: "#243247",
+    backgroundColor: escuro ? "#243247" : "#e2e8f0",
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoFecharDetalhes: {
     fontSize: 26,
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
     marginTop: -3,
   },
 
@@ -1584,14 +1586,14 @@ const styles = StyleSheet.create({
 
   labelDetalhe: {
     fontSize: 13,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     fontWeight: "600",
     marginBottom: 4,
   },
 
   valorDetalhe: {
     fontSize: 15,
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginBottom: 18,
   },
 
@@ -1646,7 +1648,7 @@ const styles = StyleSheet.create({
   },
 
   cardCalendario: {
-    backgroundColor: "#1e293b",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 18,
     padding: 18,
   },
@@ -1662,20 +1664,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#243247",
+    backgroundColor: escuro ? "#243247" : "#e2e8f0",
     justifyContent: "center",
     alignItems: "center",
   },
 
   textoSetaCalendario: {
     fontSize: 28,
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     marginTop: -3,
   },
 
   tituloCalendario: {
     fontSize: 17,
-    color: "#f1f5f9",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     fontWeight: "bold",
   },
 
@@ -1693,7 +1695,7 @@ const styles = StyleSheet.create({
 
   diaSemana: {
     fontSize: 12,
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     fontWeight: "bold",
   },
 
@@ -1711,7 +1713,7 @@ const styles = StyleSheet.create({
 
   textoDia: {
     fontSize: 14,
-    color: "#cbd5e1",
+    color: escuro ? "#cbd5e1" : "#334155",
   },
 
   textoDiaSelecionado: {
@@ -1727,12 +1729,12 @@ const styles = StyleSheet.create({
   },
 
   limparCalendario: {
-    color: "#94a3b8",
+    color: escuro ? "#94a3b8" : "#64748b",
     fontWeight: "600",
   },
 
   fecharCalendario: {
-    color: "#60a5fa",
+    color: escuro ? "#60a5fa" : "#2563eb",
     fontWeight: "bold",
   },
 });
