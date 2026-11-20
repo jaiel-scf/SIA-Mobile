@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -76,6 +76,31 @@ function verificarEstoque(produto) {
     fundo: "#dcfce7",
     icone: ArrowUpIcon,
   };
+}
+
+// O bucket é privado: a imagem é obtida pelo backend com autenticação.
+function MiniaturaProduto({ produto, token }) {
+  const [falhou, setFalhou] = useState(false);
+  const possuiImagem = Boolean(produto.imagemCaminho);
+
+  return (
+    <View style={styles.miniaturaContainer}>
+      {possuiImagem && token && !falhou ? (
+        <Image
+          key={String(produto.imagemCaminho)}
+          source={{
+            uri: `${API_URL}/produtos/${produto.id}/imagem`,
+            headers: { Authorization: `Bearer ${token}` },
+          }}
+          style={styles.miniatura}
+          resizeMode="cover"
+          onError={() => setFalhou(true)}
+        />
+      ) : (
+        <Text style={styles.semImagem}>Sem imagem</Text>
+      )}
+    </View>
+  );
 }
 
 // Gera um código SKU
@@ -511,6 +536,7 @@ export default function Estoque({ usuario, voltar }) {
 
             return (
               <View key={produto.id} style={styles.card}>
+                <MiniaturaProduto key={String(produto.imagemCaminho ?? "")} produto={produto} token={token} />
                 <View style={styles.dadosProduto}>
                   <Text style={styles.nomeProduto}>{produto.nome}</Text>
 
@@ -873,6 +899,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
+
+  // Miniatura do produto, com alternativa quando não houver imagem
+  miniaturaContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f1f5f9",
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  miniatura: { width: "100%", height: "100%" },
+  semImagem: { color: "#94a3b8", fontSize: 10, textAlign: "center" },
 
   // Card de produto
   card: {
