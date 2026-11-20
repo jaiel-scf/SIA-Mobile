@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
@@ -80,24 +80,48 @@ function verificarEstoque(produto) {
 
 // O bucket é privado: a imagem é obtida pelo backend com autenticação.
 function MiniaturaProduto({ produto, token }) {
+  const [imagemBase64, setImagemBase64] = useState(null);
   const [falhou, setFalhou] = useState(false);
-  const possuiImagem = Boolean(produto.imagemCaminho);
+  const caminho = produto.imagemCaminho;
+
+  useEffect(() => {
+    let ativo = true;
+    setImagemBase64(null);
+    setFalhou(false);
+
+    if (!caminho || !token) return () => { ativo = false; };
+
+    const carregarImagem = async () => {
+      try {
+        const resposta = await fetch(`${API_URL}/produtos/${produto.id}/imagem`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        const arquivo = await resposta.blob();
+        const leitor = new FileReader();
+        leitor.onload = () => {
+          if (ativo && typeof leitor.result === "string") setImagemBase64(leitor.result);
+        };
+        leitor.onerror = () => { if (ativo) setFalhou(true); };
+        leitor.readAsDataURL(arquivo);
+      } catch (erro) {
+        if (ativo) {
+          console.warn(`Imagem do produto ${produto.id} indisponível:`, erro.message);
+          setFalhou(true);
+        }
+      }
+    };
+    carregarImagem();
+    return () => { ativo = false; };
+  }, [produto.id, caminho, token]);
 
   return (
     <View style={styles.miniaturaContainer}>
-      {possuiImagem && token && !falhou ? (
-        <Image
-          key={String(produto.imagemCaminho)}
-          source={{
-            uri: `${API_URL}/produtos/${produto.id}/imagem`,
-            headers: { Authorization: `Bearer ${token}` },
-          }}
-          style={styles.miniatura}
-          resizeMode="cover"
-          onError={() => setFalhou(true)}
-        />
+      {imagemBase64 && !falhou ? (
+        <Image source={{ uri: imagemBase64 }} style={styles.miniatura} resizeMode="cover"
+          onError={() => setFalhou(true)} />
       ) : (
-        <Text style={styles.semImagem}>Sem imagem</Text>
+        <Text style={styles.semImagem}>{caminho && !falhou ? "Carregando..." : "Sem imagem"}</Text>
       )}
     </View>
   );
@@ -426,10 +450,6 @@ export default function Estoque({ usuario, voltar }) {
           <Text style={styles.label}>Buscar produto</Text>
           <TextInput style={styles.pesquisa} placeholder="Digite o nome ou SKU..."
             placeholderTextColor="#94a3b8" value={pesquisa} onChangeText={pesquisarProdutos} />
-        </View>
-        <View style={styles.tituloLista}>
-          <Text style={styles.tituloSecao}>Relação de produtos</Text>
-          <Text style={styles.descricaoSecao}>Acompanhamento da disponibilidade dos materiais.</Text>
         </View>
 
         {/* Carregamento */}
