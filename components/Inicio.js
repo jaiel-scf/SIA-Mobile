@@ -1,202 +1,322 @@
-import { useState } from "react";
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+
 import { LinearGradient } from "expo-linear-gradient";
 
+// Ícone oficial do SIA
 import BlocksIcon from "../assets/icons/blocks.svg";
-import BotaoTema from "./BotaoTema";
-import CartaoBoasVindas from "./CartaoBoasVindas";
-import IndicadoresDashboard from "./IndicadoresDashboard";
-import { API_URL } from "../config/api";
 
-export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema }) {
-  const [menuAberto, setMenuAberto] = useState(false);
-  const [preferencias, setPreferencias] = useState(false);
-  const [meuPerfilAberto, setMeuPerfilAberto] = useState(false);
-  const [nomeAtual, setNomeAtual] = useState(usuario?.nome || "Usuário");
-  const [nomeEditado, setNomeEditado] = useState(nomeAtual);
-  const [salvando, setSalvando] = useState(false);
+// Ícones das funcionalidades
+import ClipboardListIcon from "../assets/icons/clipboard-list.svg";
+import PackagePlusIcon from "../assets/icons/package-plus.svg";
+import SendIcon from "../assets/icons/send.svg";
+import UserPlusIcon from "../assets/icons/user-plus.svg";
+import LogOutIcon from "../assets/icons/log-out.svg";
 
-  async function salvarPerfil() {
-    const nome = nomeEditado.trim();
-    if (nome.length < 3 || nome.length > 120) {
-      Alert.alert("Nome inválido", "Informe um nome entre 3 e 120 caracteres.");
-      return;
-    }
-    if (!usuario?.token) {
-      Alert.alert("Sessão expirada", "Faça login novamente.");
-      return;
-    }
-    if (nome === nomeAtual) {
-      setMeuPerfilAberto(false);
-      return;
-    }
-    setSalvando(true);
-    try {
-      const resposta = await fetch(`${API_URL}/usuarios/meu-perfil`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${usuario.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ nome }),
-      });
-      if (!resposta.ok) {
-        throw new Error(resposta.status === 404
-          ? "A atualização de perfil ainda não está disponível no servidor."
-          : "Não foi possível atualizar seu perfil.");
-      }
-      const atualizado = await resposta.json();
-      const nomeSalvo = atualizado.nome || nome;
-      setNomeAtual(nomeSalvo);
-      usuario.nome = nomeSalvo;
-      setMeuPerfilAberto(false);
-      Alert.alert("Perfil atualizado", "Seu nome foi salvo com sucesso.");
-    } catch (erro) {
-      Alert.alert("Erro", erro.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
+export default function Inicio({
+  usuario,
+  irParaEstoque,
+  irParaEntradas,
+  irParaSaidas,
+  irParaUsuarios,
+  voltarParaLogin,
+}) {
+  // Identifica o administrador
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
-  const perfil = administrador ? "Administrador" : "Usuário";
 
-  const cores = {
-    fundo: escuro ? "#0B1220" : "#F4F7FC",
-    card: escuro ? "#17233A" : "#FFFFFF",
-    texto: escuro ? "#F8FAFC" : "#0F172A",
-    secundario: escuro ? "#A9B9D0" : "#64748B",
-    borda: escuro ? "#2B3B54" : "#E7EDF5",
-  };
-
-  function aviso(titulo) {
-    setMenuAberto(false);
-    Alert.alert(titulo, "Estamos verificando a integração segura com o backend antes de liberar esta função.");
-  }
+  // Nome do perfil exibido no card
+  const nomePerfil = administrador ? "Administrador" : "Usuário";
 
   return (
-    <View style={[styles.container, { backgroundColor: cores.fundo }]}>
-      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.conteudo}>
+        {/* Cabeçalho */}
         <View style={styles.cabecalho}>
-          <LinearGradient colors={["#2563EB", "#38BDF8"]} style={styles.logo}>
-            <BlocksIcon width={29} height={29} color="#FFFFFF" />
+          {/* Ícone oficial com o degradê do Login */}
+          <LinearGradient colors={["#2563eb", "#38bdf8"]} style={styles.logo}>
+            <BlocksIcon width={30} height={30} color="#ffffff" />
           </LinearGradient>
-          <View style={styles.titulos}>
-            <Text style={[styles.titulo, { color: cores.texto }]}>SIA</Text>
-            <Text style={{ color: cores.secundario }}>Sistema de Almoxarifado</Text>
+
+          {/* Nome do sistema */}
+          <View style={styles.areaTitulo}>
+            <Text style={styles.titulo}>SIA</Text>
+
+            <Text style={styles.subtitulo}>Sistema de Almoxarifado</Text>
           </View>
-          <Pressable
-            onPress={() => setMenuAberto(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir menu da minha conta"
-            style={[styles.avatar, { backgroundColor: cores.card, borderColor: cores.borda }]}
-          >
-            <Text style={{ fontSize: 22 }}>👤</Text>
+
+          {/* Sair */}
+          <Pressable style={styles.botaoSair} onPress={voltarParaLogin}>
+            <LogOutIcon width={22} height={22} color="#475569" />
           </Pressable>
         </View>
 
-        <CartaoBoasVindas nome={nomeAtual} perfil={perfil} />
+        {/* Boas-vindas */}
+        <View style={styles.cardBoasVindas}>
+          <Text style={styles.textoBemVindo}>Bem-vindo</Text>
 
-        <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
-        <IndicadoresDashboard usuario={usuario} escuro={escuro} />
+          <Text style={styles.nomeUsuario}>{usuario?.nome || "Usuário"}</Text>
 
-      </ScrollView>
+          {/* Perfil sem aparência de botão */}
+          <Text style={styles.textoPerfil}>{nomePerfil}</Text>
+        </View>
 
-      <Modal transparent visible={menuAberto} animationType="fade" onRequestClose={() => setMenuAberto(false)}>
-        <Pressable style={styles.sobreposicao} onPress={() => setMenuAberto(false)}>
-          <View style={[styles.menuConta, { backgroundColor: cores.card }]}>
-            <Text style={[styles.menuCabecalho, { color: cores.secundario }]}>MINHA CONTA</Text>
-            <Text style={[styles.menuNome, { color: cores.texto }]}>{nomeAtual}</Text>
-            <Text style={[styles.menuPerfil, { color: cores.secundario }]}>{perfil}</Text>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setNomeEditado(nomeAtual); setMeuPerfilAberto(true); }}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>👤   Meu perfil</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => aviso("Alterar senha")}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>🔒   Alterar senha</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setPreferencias(true); }}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>⚙️   Preferências</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); voltarParaLogin(); }}>
-              <Text style={[styles.opcao, { color: "#DC2626" }]}>↪   Sair do sistema</Text>
-            </Pressable>
+        {/* Acesso rápido */}
+        <Text style={styles.tituloSecao}>Acesso rápido</Text>
+
+        {/* Estoque - todos os usuários */}
+        <Pressable style={styles.cardMenu} onPress={irParaEstoque}>
+          <View style={styles.iconeAzul}>
+            <ClipboardListIcon width={27} height={27} color="#ffffff" />
           </View>
+
+          <View style={styles.textoMenu}>
+            <Text style={styles.menuTitulo}>Estoque</Text>
+
+            <Text style={styles.menuDescricao}>Consultar produtos e quantidades</Text>
+          </View>
+
+          <Text style={styles.seta}>›</Text>
         </Pressable>
-      </Modal>
 
-      <Modal transparent visible={meuPerfilAberto} animationType="fade" onRequestClose={() => !salvando && setMeuPerfilAberto(false)}>
-        <View style={styles.sobreposicao}>
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>Meu perfil</Text>
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>Nome completo</Text>
-            <TextInput
-              style={[styles.campoPerfil, { color: cores.texto, borderColor: cores.borda }]}
-              value={nomeEditado}
-              onChangeText={setNomeEditado}
-              maxLength={120}
-              editable={!salvando}
-              autoCapitalize="words"
-            />
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>E-mail</Text>
-            <Text style={[styles.campoSomenteLeitura, { color: cores.texto, backgroundColor: cores.fundo }]}>
-              {usuario?.email || "Não informado"}
-            </Text>
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>Perfil de acesso</Text>
-            <Text style={[styles.campoSomenteLeitura, { color: cores.texto, backgroundColor: cores.fundo }]}>{perfil}</Text>
-            <Pressable disabled={salvando} style={styles.salvarPerfil} onPress={salvarPerfil}>
-              <Text style={styles.salvarPerfilTexto}>{salvando ? "Salvando..." : "Salvar alterações"}</Text>
-            </Pressable>
-            <Pressable disabled={salvando} style={styles.fechar} onPress={() => setMeuPerfilAberto(false)}>
-              <Text style={styles.fecharTexto}>Cancelar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+        {/* Entradas - somente administrador */}
+        {administrador && (
+          <Pressable style={styles.cardMenu} onPress={irParaEntradas}>
+            <View style={styles.iconeVerde}>
+              <PackagePlusIcon width={27} height={27} color="#ffffff" />
+            </View>
 
-      <Modal transparent visible={preferencias} animationType="fade" onRequestClose={() => setPreferencias(false)}>
-        <View style={styles.sobreposicao}>
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>Preferências</Text>
-            <Text style={[styles.descricao, { color: cores.secundario }]}>Aparência do SIA-Mobile</Text>
-            <BotaoTema escuro={escuro} aoPressionar={alternarTema} />
-            <Pressable style={styles.fechar} onPress={() => setPreferencias(false)}>
-              <Text style={styles.fecharTexto}>Concluir</Text>
-            </Pressable>
+            <View style={styles.textoMenu}>
+              <Text style={styles.menuTitulo}>Entradas</Text>
+
+              <Text style={styles.menuDescricao}>Registrar entrada de produtos</Text>
+            </View>
+
+            <Text style={styles.seta}>›</Text>
+          </Pressable>
+        )}
+
+        {/* Requisições - todos os usuários */}
+        <Pressable style={styles.cardMenu} onPress={irParaSaidas}>
+          <View style={styles.iconeLaranja}>
+            <SendIcon width={27} height={27} color="#ffffff" />
           </View>
-        </View>
-      </Modal>
+
+          <View style={styles.textoMenu}>
+            <Text style={styles.menuTitulo}>Requisições</Text>
+
+            <Text style={styles.menuDescricao}>Registrar retirada de produtos</Text>
+          </View>
+
+          <Text style={styles.seta}>›</Text>
+        </Pressable>
+
+        {/* Usuários - somente administrador */}
+        {administrador && (
+          <Pressable style={styles.cardMenu} onPress={irParaUsuarios}>
+            <View style={styles.iconeRoxo}>
+              <UserPlusIcon width={27} height={27} color="#ffffff" />
+            </View>
+
+            <View style={styles.textoMenu}>
+              <Text style={styles.menuTitulo}>Usuários</Text>
+
+              <Text style={styles.menuDescricao}>Cadastrar usuários do sistema</Text>
+            </View>
+
+            <Text style={styles.seta}>›</Text>
+          </Pressable>
+        )}
+
+        {/* Rodapé */}
+        <Text style={styles.rodape}>Sistema de Almoxarifado • 2026</Text>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  conteudo: { paddingHorizontal: 20, paddingTop: 46, paddingBottom: 28 },
-  cabecalho: { flexDirection: "row", alignItems: "center", marginBottom: 24 },
-  logo: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  titulos: { flex: 1, marginLeft: 12 },
-  titulo: { fontSize: 24, fontWeight: "800" },
-  avatar: { width: 46, height: 46, borderWidth: 1, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  boasVindas: { padding: 22, borderRadius: 20, marginBottom: 26 },
-  saudacao: { color: "#BFDBFE", fontSize: 14 },
-  nome: { color: "#FFFFFF", fontSize: 24, fontWeight: "800", marginTop: 5 },
-  perfil: { color: "#DBEAFE", marginTop: 8 },
-  secao: { fontSize: 18, fontWeight: "800", marginBottom: 13 },
-  card: { borderRadius: 17, borderWidth: 1, padding: 20, marginBottom: 25 },
-  cardTitulo: { fontSize: 15, fontWeight: "700", marginBottom: 5 },
-  descricao: { fontSize: 13, lineHeight: 21 },
-  sobreposicao: { flex: 1, backgroundColor: "#00000088", justifyContent: "center", padding: 20 },
-  menuConta: { borderRadius: 18, paddingVertical: 12, paddingHorizontal: 18, maxWidth: 420, width: "100%", alignSelf: "center" },
-  menuCabecalho: { fontSize: 11, fontWeight: "700", letterSpacing: 1.3, marginTop: 10 },
-  menuNome: { fontSize: 19, fontWeight: "800", marginTop: 12 },
-  menuPerfil: { fontSize: 13, marginBottom: 12 },
-  linha: { paddingVertical: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "#94A3B866" },
-  opcao: { fontSize: 15, fontWeight: "600" },
-  preferencias: { borderRadius: 20, padding: 22, maxWidth: 420, width: "100%", alignSelf: "center" },
-  fechar: { alignItems: "center", marginTop: 18, paddingVertical: 12 },
-  fecharTexto: { color: "#3B82F6", fontWeight: "700" },
-  campoRotulo: { fontSize: 12, fontWeight: "700", marginTop: 12, marginBottom: 6 },
-  campoPerfil: { borderWidth: 1, borderRadius: 12, padding: 12, fontSize: 15 },
-  campoSomenteLeitura: { borderRadius: 12, padding: 13, fontSize: 14 },
-  salvarPerfil: { backgroundColor: "#2563EB", padding: 14, borderRadius: 12, alignItems: "center", marginTop: 22 },
-  salvarPerfilTexto: { color: "#FFFFFF", fontWeight: "700" },
+  // Fundo principal
+  container: {
+    flex: 1,
+    backgroundColor: "#0f172a",
+  },
+
+  // Espaçamento
+  conteudo: {
+    paddingHorizontal: 20,
+    paddingTop: 55,
+    paddingBottom: 35,
+  },
+
+  // Cabeçalho
+  cabecalho: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 25,
+  },
+
+  // Ícone igual ao Login
+  logo: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+
+  areaTitulo: {
+    flex: 1,
+  },
+
+  titulo: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#f1f5f9",
+  },
+
+  subtitulo: {
+    fontSize: 13,
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+
+  // Botão sair
+  botaoSair: {
+    width: 43,
+    height: 43,
+    borderRadius: 12,
+    backgroundColor: "#243247",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Boas-vindas
+  cardBoasVindas: {
+    backgroundColor: "#243247",
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 28,
+  },
+
+  textoBemVindo: {
+    fontSize: 14,
+    color: "#bfdbfe",
+  },
+
+  nomeUsuario: {
+    fontSize: 23,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginTop: 4,
+  },
+
+  // Perfil como texto, sem aparência de botão
+  textoPerfil: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#bfdbfe",
+    marginTop: 10,
+  },
+
+  // Acesso rápido
+  tituloSecao: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#f1f5f9",
+    marginBottom: 14,
+  },
+
+  // Cards dos menus
+  cardMenu: {
+    minHeight: 82,
+    backgroundColor: "#1e293b",
+    borderRadius: 16,
+    padding: 15,
+    marginBottom: 13,
+    flexDirection: "row",
+    alignItems: "center",
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+
+  // Estoque
+  iconeAzul: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+
+  // Entradas
+  iconeVerde: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#16a34a",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+
+  // Requisições
+  iconeLaranja: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#ea580c",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+
+  // Usuários
+  iconeRoxo: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#7c3aed",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+
+  textoMenu: {
+    flex: 1,
+  },
+
+  menuTitulo: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#f1f5f9",
+  },
+
+  menuDescricao: {
+    fontSize: 13,
+    color: "#94a3b8",
+    marginTop: 3,
+  },
+
+  seta: {
+    fontSize: 30,
+    color: "#94a3b8",
+    marginLeft: 8,
+  },
+
+  // Rodapé
+  rodape: {
+    textAlign: "center",
+    color: "#94a3b8",
+    fontSize: 12,
+    marginTop: 18,
+  },
 });
