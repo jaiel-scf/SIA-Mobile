@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import {
   Alert,
+  Image,
   findNodeHandle,
   KeyboardAvoidingView,
   Platform,
@@ -85,6 +86,9 @@ export default function Entradas({ usuario, voltar }) {
   const [estoqueMinimo, setEstoqueMinimo] = useState("");
   const [quantidadeInicial, setQuantidadeInicial] = useState("");
   const [valorUnitarioInicial, setValorUnitarioInicial] = useState("");
+  const [imagemNovoProduto, setImagemNovoProduto] = useState(null);
+  const [previewNovoProduto, setPreviewNovoProduto] = useState(null);
+  const [erroImagemNovoProduto, setErroImagemNovoProduto] = useState("");
 
   // Campos da entrada
   const [observacao, setObservacao] = useState("");
@@ -233,8 +237,30 @@ export default function Entradas({ usuario, voltar }) {
     setEstoqueMinimo("");
     setQuantidadeInicial("");
     setValorUnitarioInicial("");
+    setImagemNovoProduto(null);
+    setPreviewNovoProduto(null);
+    setErroImagemNovoProduto("");
     setObservacao("");
     setMensagemSucesso("");
+  }
+
+  // O Expo Web usa o seletor de arquivos do navegador.
+  function selecionarImagemNovoProduto(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (!["image/jpeg", "image/png"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024) {
+      setErroImagemNovoProduto("Selecione uma imagem JPG ou PNG de até 5 MB.");
+      evento.target.value = "";
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      setImagemNovoProduto(arquivo);
+      setPreviewNovoProduto(typeof leitor.result === "string" ? leitor.result : null);
+      setErroImagemNovoProduto("");
+    };
+    leitor.onerror = () => setErroImagemNovoProduto("Não foi possível ler a imagem.");
+    leitor.readAsDataURL(arquivo);
   }
 
   // Alterna entre entrada e cadastro
@@ -449,6 +475,24 @@ export default function Entradas({ usuario, voltar }) {
         throw new Error(
           "Produto cadastrado, mas o servidor não retornou seu identificador.",
         );
+      }
+
+      // O produto já existe no banco. Falha de imagem não pode gerar novo cadastro.
+      if (imagemNovoProduto) {
+        try {
+          const formularioImagem = new FormData();
+          formularioImagem.append("arquivo", imagemNovoProduto);
+          const respostaImagem = await fetch(`${API_URL}/produtos/${produtoCriado.id}/imagem`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formularioImagem,
+          });
+          if (!respostaImagem.ok) {
+            throw new Error(`Falha ao enviar a imagem (HTTP ${respostaImagem.status}).`);
+          }
+        } catch (erroImagem) {
+          setErroImagemNovoProduto(`Produto cadastrado, mas a imagem não foi enviada: ${erroImagem.message}. Adicione-a posteriormente no Estoque.`);
+        }
       }
 
       // Registra a quantidade recebida
@@ -780,6 +824,26 @@ export default function Entradas({ usuario, voltar }) {
 
                   <Text style={styles.label}>Custo unitário inicial (R$)</Text>
                   <TextInput style={styles.input} placeholder="Ex.: 12,50" placeholderTextColor="#94a3b8" value={valorUnitarioInicial} onChangeText={setValorUnitarioInicial} keyboardType="decimal-pad" editable={!salvando} />
+
+                  <Text style={styles.label}>Imagem do produto (opcional)</Text>
+                  {previewNovoProduto ? (
+                    <Image source={{ uri: previewNovoProduto }} style={styles.previewCadastro} resizeMode="contain" />
+                  ) : (
+                    <View style={styles.areaPreviewCadastro}><Text style={styles.textoPreviewCadastro}>Sem imagem</Text></View>
+                  )}
+                  {Platform.OS === "web" && (
+                    <View style={styles.botoesImagemCadastro}>
+                      <label style={{ display: "inline-block", padding: 11, backgroundColor: "#dbeafe", color: "#1d4ed8", fontWeight: 600, borderRadius: 10, cursor: "pointer", fontSize: 13 }}>
+                        Selecionar imagem
+                        <input type="file" accept="image/jpeg,image/png" disabled={salvando} onChange={selecionarImagemNovoProduto} style={{ display: "none" }} />
+                      </label>
+                      <Pressable disabled={salvando} onPress={() => { setImagemNovoProduto(null); setPreviewNovoProduto(null); setErroImagemNovoProduto(""); }}>
+                        <Text style={{ color: "#dc2626", fontWeight: "600" }}>Remover imagem</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                  <Text style={styles.ajudaImagemCadastro}>JPG ou PNG • Até 5 MB</Text>
+                  {!!erroImagemNovoProduto && <Text style={{ color: "#dc2626", marginBottom: 12 }}>{erroImagemNovoProduto}</Text>}
                 </>
               )}
 
@@ -894,6 +958,11 @@ export default function Entradas({ usuario, voltar }) {
 }
 
 const styles = StyleSheet.create({
+  previewCadastro: { width: 128, height: 128, borderRadius: 12, marginBottom: 12 },
+  areaPreviewCadastro: { width: 128, height: 128, borderRadius: 12, backgroundColor: "#f1f5f9", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  textoPreviewCadastro: { color: "#94a3b8", fontSize: 12 },
+  botoesImagemCadastro: { flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 8 },
+  ajudaImagemCadastro: { color: "#64748b", fontSize: 12, marginBottom: 18 },
   container: {
     flex: 1,
     backgroundColor: "#F4F7FC",
