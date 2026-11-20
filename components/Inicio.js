@@ -1,145 +1,16 @@
-import { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import BlocksIcon from "../assets/icons/blocks.svg";
-import EyeIcon from "../assets/icons/eye.svg";
-import EyeOffIcon from "../assets/icons/eye-off.svg";
-import BotaoTema from "./BotaoTema";
 import CartaoBoasVindas from "./CartaoBoasVindas";
 import IndicadoresDashboard from "./IndicadoresDashboard";
-import { API_URL } from "../config/api";
 
 export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema, irParaEstoque, irParaSaidas }) {
-  const [menuAberto, setMenuAberto] = useState(false);
-  const [preferencias, setPreferencias] = useState(false);
-  const [meuPerfilAberto, setMeuPerfilAberto] = useState(false);
-  const [nomeAtual, setNomeAtual] = useState(usuario?.nome || "Usuário");
-  const [nomeEditado, setNomeEditado] = useState(nomeAtual);
-  const [salvando, setSalvando] = useState(false);
-  const [senhaAberta, setSenhaAberta] = useState(false);
-  const [senhaAtual, setSenhaAtual] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
-  const [senhasVisiveis, setSenhasVisiveis] = useState({});
-  const [alterandoSenha, setAlterandoSenha] = useState(false);
-  const [mensagem, setMensagem] = useState(null);
-  const notificar = (titulo, descricao) => setMensagem({ titulo, descricao });
-
-  function fecharPerfil() {
-    if (salvando) return;
-    setMeuPerfilAberto(false);
-    setNomeEditado(nomeAtual);
-  }
-
-  function fecharPreferencias() {
-    setPreferencias(false);
-  }
-
-  async function salvarPerfil() {
-    const nome = nomeEditado.trim();
-    if (nome.length < 3 || nome.length > 120) {
-      notificar("Nome inválido", "Informe um nome entre 3 e 120 caracteres.");
-      return;
-    }
-    if (!usuario?.token) {
-      notificar("Sessão expirada", "Faça login novamente.");
-      return;
-    }
-    if (nome === nomeAtual) {
-      setMeuPerfilAberto(false);
-      return;
-    }
-    setSalvando(true);
-    try {
-      const resposta = await fetch(`${API_URL}/usuarios/meu-perfil`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${usuario.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ nome }),
-      });
-      if (!resposta.ok) {
-        throw new Error(resposta.status === 404
-          ? "A atualização de perfil ainda não está disponível no servidor."
-          : "Não foi possível atualizar seu perfil.");
-      }
-      const atualizado = await resposta.json();
-      const nomeSalvo = atualizado.nome || nome;
-      setNomeAtual(nomeSalvo);
-      usuario.nome = nomeSalvo;
-      setMeuPerfilAberto(false);
-      notificar("Perfil atualizado", "Seu nome foi salvo com sucesso.");
-    } catch (erro) {
-      notificar("Erro", erro.message);
-    } finally {
-      setSalvando(false);
-    }
-  }
-  const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
-  const perfil = administrador ? "Administrador" : "Usuário";
-
   const cores = {
     fundo: escuro ? "#0f172a" : "#F4F7FC",
-    card: escuro ? "#1e293b" : "#FFFFFF",
     texto: escuro ? "#f1f5f9" : "#0F172A",
     secundario: escuro ? "#94a3b8" : "#64748B",
-    borda: escuro ? "#334155" : "#E7EDF5",
   };
-
-  function fecharModalSenha() {
-    if (alterandoSenha) return;
-    setSenhaAberta(false);
-    setSenhaAtual("");
-    setNovaSenha("");
-    setConfirmarSenha("");
-    setSenhasVisiveis({});
-  }
-
-  async function salvarSenha() {
-    if (!senhaAtual || novaSenha.length < 6) {
-      notificar("Dados inválidos", "Informe a senha atual e uma nova senha com pelo menos 6 caracteres.");
-      return;
-    }
-    if (novaSenha !== confirmarSenha) {
-      notificar("Confirmação inválida", "As novas senhas não coincidem.");
-      return;
-    }
-    if (senhaAtual === novaSenha) {
-      notificar("Senha inválida", "A nova senha deve ser diferente da atual.");
-      return;
-    }
-    if (!usuario?.token) {
-      notificar("Sessão expirada", "Faça login novamente.");
-      return;
-    }
-    setAlterandoSenha(true);
-    try {
-      const resposta = await fetch(`${API_URL}/usuarios/me/senha`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${usuario.token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ senhaAtual, novaSenha }),
-      });
-      if (!resposta.ok) {
-        const mensagens = {
-          400: "Senha atual incorreta ou nova senha inválida.",
-          401: "Sessão expirada. Faça login novamente.",
-          403: "Acesso não permitido.",
-        };
-        throw new Error(mensagens[resposta.status] || "Não foi possível alterar a senha.");
-      }
-      setSenhaAberta(false);
-      setSenhaAtual("");
-      setNovaSenha("");
-      setConfirmarSenha("");
-      notificar("Senha alterada", "Sua senha foi atualizada com sucesso.");
-    } catch (erro) {
-      notificar("Erro", erro.message);
-    } finally {
-      setAlterandoSenha(false);
-    }
-  }
 
   return (
     <View style={[styles.container, { backgroundColor: cores.fundo }]}>
@@ -152,136 +23,16 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema,
             <Text style={[styles.titulo, { color: cores.texto }]}>SIA</Text>
             <Text style={{ color: cores.secundario }}>Sistema de Almoxarifado</Text>
           </View>
-          <Pressable
-            onPress={() => setMenuAberto(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir menu da minha conta"
-            style={[styles.avatar, { backgroundColor: cores.card, borderColor: cores.borda }]}
-          >
-            <Text style={{ fontSize: 22 }}>👤</Text>
-          </Pressable>
         </View>
 
-        <CartaoBoasVindas nome={nomeAtual} perfil={perfil} />
+        <CartaoBoasVindas nome={usuario?.nome || "Usuário"} perfil={String(usuario?.perfil ?? "").toLowerCase() === "admin" ? "Administrador" : "Usuário"} />
 
         <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
         <IndicadoresDashboard usuario={usuario} escuro={escuro} irParaEstoque={irParaEstoque} irParaSaidas={irParaSaidas} />
 
       </ScrollView>
 
-      <Modal transparent visible={menuAberto} animationType="fade" onRequestClose={() => setMenuAberto(false)}>
-        <View style={styles.sobreposicao}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setMenuAberto(false)} accessibilityRole="button" accessibilityLabel="Fechar menu" />
-          <View style={[styles.menuConta, { backgroundColor: cores.card }]}>
-            <Text style={[styles.menuCabecalho, { color: cores.secundario }]}>MINHA CONTA</Text>
-            <Text style={[styles.menuNome, { color: cores.texto }]}>{nomeAtual}</Text>
-            <Text style={[styles.menuPerfil, { color: cores.secundario }]}>{perfil}</Text>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setNomeEditado(nomeAtual); setMeuPerfilAberto(true); }}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>👤   Meu perfil</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setSenhaAberta(true); }}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>🔒   Alterar senha</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); setPreferencias(true); }}>
-              <Text style={[styles.opcao, { color: cores.texto }]}>⚙️   Preferências</Text>
-            </Pressable>
-            <Pressable style={styles.linha} onPress={() => { setMenuAberto(false); voltarParaLogin(); }}>
-              <Text style={[styles.opcao, { color: "#DC2626" }]}>↪   Sair do sistema</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
 
-      <Modal transparent visible={meuPerfilAberto} animationType="fade" onRequestClose={fecharPerfil}>
-        <View style={styles.sobreposicao}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={fecharPerfil} accessibilityRole="button" accessibilityLabel="Fechar janela" />
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>Meu perfil</Text>
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>Nome completo</Text>
-            <TextInput
-              style={[styles.campoPerfil, { color: cores.texto, borderColor: cores.borda }]}
-              value={nomeEditado}
-              onChangeText={setNomeEditado}
-              maxLength={120}
-              editable={!salvando}
-              autoCapitalize="words"
-            />
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>E-mail</Text>
-            <Text style={[styles.campoSomenteLeitura, { color: cores.texto, backgroundColor: cores.fundo }]}>
-              {usuario?.email || "Não informado"}
-            </Text>
-            <Text style={[styles.campoRotulo, { color: cores.secundario }]}>Perfil de acesso</Text>
-            <Text style={[styles.campoSomenteLeitura, { color: cores.texto, backgroundColor: cores.fundo }]}>{perfil}</Text>
-            <Pressable disabled={salvando} style={styles.salvarPerfil} onPress={salvarPerfil}>
-              <Text style={styles.salvarPerfilTexto}>{salvando ? "Salvando..." : "Salvar alterações"}</Text>
-            </Pressable>
-            <Pressable disabled={salvando} style={styles.fechar} onPress={fecharPerfil}>
-              <Text style={styles.fecharTexto}>Cancelar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent visible={senhaAberta} animationType="fade" onRequestClose={fecharModalSenha}>
-        <View style={styles.sobreposicao}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={fecharModalSenha} accessibilityRole="button" accessibilityLabel="Fechar alteração de senha" />
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>Alterar senha</Text>
-            {[
-              ["Senha atual", senhaAtual, setSenhaAtual],
-              ["Nova senha (mínimo 6 caracteres)", novaSenha, setNovaSenha],
-              ["Confirmar nova senha", confirmarSenha, setConfirmarSenha],
-            ].map(([rotulo, valor, alterar]) => (
-              <View key={rotulo}>
-                <Text style={[styles.campoRotulo, { color: cores.secundario }]}>{rotulo}</Text>
-                <View style={[styles.campoSenhaContainer, { borderColor: cores.borda }]}>
-                  <TextInput style={[styles.campoSenhaInput, { color: cores.texto }]}
-                    value={valor} onChangeText={alterar} onSubmitEditing={() => {}} blurOnSubmit={true} secureTextEntry={!senhasVisiveis[rotulo]}
-                    editable={!alterandoSenha} autoCapitalize="none" />
-                  <Pressable onPress={() => setSenhasVisiveis((anterior) => ({ ...anterior, [rotulo]: !anterior[rotulo] }))}
-                    accessibilityRole="button" accessibilityLabel={senhasVisiveis[rotulo] ? "Ocultar senha" : "Mostrar senha"}
-                    style={styles.botaoVisibilidade}>
-                    {senhasVisiveis[rotulo] ? <EyeOffIcon width={20} height={20} color={cores.secundario} /> : <EyeIcon width={20} height={20} color={cores.secundario} />}
-                  </Pressable>
-                </View>
-              </View>
-            ))}
-            <Pressable disabled={alterandoSenha} style={styles.salvarPerfil} onPress={salvarSenha}>
-              <Text style={styles.salvarPerfilTexto}>{alterandoSenha ? "Salvando..." : "Alterar senha"}</Text>
-            </Pressable>
-            <Pressable disabled={alterandoSenha} style={styles.fechar} onPress={fecharModalSenha}>
-              <Text style={styles.fecharTexto}>Cancelar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent visible={!!mensagem} animationType="fade" onRequestClose={() => setMensagem(null)}>
-        <View style={styles.sobreposicao}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setMensagem(null)} accessibilityRole="button" accessibilityLabel="Fechar janela" />
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>{mensagem?.titulo}</Text>
-            <Text style={[styles.descricao, { color: cores.secundario }]}>{mensagem?.descricao}</Text>
-            <Pressable style={styles.fechar} onPress={() => setMensagem(null)}>
-              <Text style={styles.fecharTexto}>Entendi</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent visible={preferencias} animationType="fade" onRequestClose={fecharPreferencias}>
-        <View style={styles.sobreposicao}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={fecharPreferencias} accessibilityRole="button" accessibilityLabel="Fechar janela" />
-          <View style={[styles.preferencias, { backgroundColor: cores.card }]}>
-            <Text style={[styles.secao, { color: cores.texto }]}>Preferências</Text>
-            <Text style={[styles.descricao, { color: cores.secundario }]}>Aparência do SIA-Mobile</Text>
-            <BotaoTema escuro={escuro} aoPressionar={alternarTema} />
-            <Pressable style={styles.fechar} onPress={fecharPreferencias}>
-              <Text style={styles.fecharTexto}>Concluir</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
