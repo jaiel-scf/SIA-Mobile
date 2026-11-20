@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   // Fundo principal
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#0f172a",
   },
 
   // Espaçamento
@@ -171,12 +171,12 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
   },
 
   subtitulo: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     marginTop: 2,
   },
 
@@ -185,14 +185,14 @@ const styles = StyleSheet.create({
     width: 43,
     height: 43,
     borderRadius: 12,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#243247",
     alignItems: "center",
     justifyContent: "center",
   },
 
   // Boas-vindas
   cardBoasVindas: {
-    backgroundColor: "#1e40af",
+    backgroundColor: "#243247",
     borderRadius: 18,
     padding: 20,
     marginBottom: 28,
@@ -222,14 +222,14 @@ const styles = StyleSheet.create({
   tituloSecao: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
     marginBottom: 14,
   },
 
   // Cards dos menus
   cardMenu: {
     minHeight: 82,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     borderRadius: 16,
     padding: 15,
     marginBottom: 13,
@@ -297,12 +297,12 @@ const styles = StyleSheet.create({
   menuTitulo: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
   },
 
   menuDescricao: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     marginTop: 3,
   },
 
