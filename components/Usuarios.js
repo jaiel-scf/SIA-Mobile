@@ -654,7 +654,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: escuro ? "#334155" : "#e2e8f0",
+    backgroundColor: escuro ? "#243247" : "#EAF1FC",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -662,7 +662,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
 
   textoVoltar: {
     fontSize: 32,
-    color: escuro ? "#6366f1" : "#7c3aed",
+    color: "#2563eb",
     marginTop: -3,
   },
 
@@ -698,7 +698,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   botaoNovo: {
-    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
+    backgroundColor: "#2563eb",
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
@@ -723,7 +723,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.035,
     shadowRadius: 5,
     elevation: 3,
   },
@@ -791,11 +791,11 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   perfilAdministrador: {
-    backgroundColor: "#ede9fe",
+    backgroundColor: escuro ? "#1e3a5f" : "#dbeafe",
   },
 
   perfilAdministradorTexto: {
-    color: escuro ? "#6366f1" : "#7c3aed",
+    color: "#2563eb",
   },
 
   statusAtivo: {
@@ -871,7 +871,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   tentarNovamente: {
-    color: escuro ? "#6366f1" : "#7c3aed",
+    color: "#2563eb",
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -911,8 +911,8 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   paginaAtiva: {
-    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
-    borderColor: escuro ? "#6366f1" : "#7c3aed",
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
   },
 
   botaoPaginaDesabilitado: {
@@ -1068,8 +1068,8 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   botaoPerfilSelecionado: {
-    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
-    borderColor: escuro ? "#6366f1" : "#7c3aed",
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
   },
 
   textoBotaoPerfil: {
@@ -1096,7 +1096,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
   botaoSalvar: {
     flex: 1,
     minHeight: 50,
-    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
+    backgroundColor: "#2563eb",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
