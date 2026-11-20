@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -160,6 +160,10 @@ export default function Estoque({ usuario, voltar }) {
 
   // Produto selecionado para edição
   const [produtoEditando, setProdutoEditando] = useState(null);
+  const [imagemSelecionada, setImagemSelecionada] = useState(null);
+  const [imagemPreview, setImagemPreview] = useState(null);
+  const [removerImagem, setRemoverImagem] = useState(false);
+  const [erroEdicao, setErroEdicao] = useState("");
 
   // Campos de edição do produto
   const [codigo, setCodigo] = useState("");
@@ -231,6 +235,10 @@ export default function Estoque({ usuario, voltar }) {
     if (!administrador) return;
 
     setProdutoEditando(produto);
+    setImagemSelecionada(null);
+    setImagemPreview(null);
+    setRemoverImagem(false);
+    setErroEdicao("");
 
     setCodigo(String(produto.codigo ?? ""));
     setNome(String(produto.nome ?? ""));
@@ -246,7 +254,31 @@ export default function Estoque({ usuario, voltar }) {
 
   // Cancela a edição
   function cancelarEdicao() {
+    if (salvando) return;
     setProdutoEditando(null);
+    setImagemSelecionada(null);
+    setImagemPreview(null);
+    setRemoverImagem(false);
+    setErroEdicao("");
+  }
+
+  function selecionarImagem(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (!["image/jpeg", "image/png"].includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024) {
+      setErroEdicao("Selecione uma imagem JPG ou PNG de até 5 MB.");
+      evento.target.value = "";
+      return;
+    }
+    setErroEdicao("");
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      setImagemSelecionada(arquivo);
+      setImagemPreview(typeof leitor.result === "string" ? leitor.result : null);
+      setRemoverImagem(false);
+    };
+    leitor.onerror = () => setErroEdicao("Não foi possível visualizar a imagem selecionada.");
+    leitor.readAsDataURL(arquivo);
   }
 
   // Salva alterações do produto
@@ -286,6 +318,7 @@ export default function Estoque({ usuario, voltar }) {
     }
 
     setSalvando(true);
+    setErroEdicao("");
 
     try {
       const resposta = await fetch(`${API_URL}/produtos/${produtoEditando.id}`, {
@@ -305,13 +338,39 @@ export default function Estoque({ usuario, voltar }) {
         throw new Error(`Não foi possível editar o produto (${resposta.status}).`);
       }
 
-      cancelarEdicao();
+      // Mantém a mesma sequência do SIA Web: dados e depois imagem.
+      if (imagemSelecionada) {
+        const formulario = new FormData();
+        formulario.append("arquivo", imagemSelecionada);
+        const respostaImagem = await fetch(`${API_URL}/produtos/${produtoEditando.id}/imagem`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formulario,
+        });
+        if (!respostaImagem.ok) {
+          throw new Error(`Dados atualizados, mas o envio da imagem falhou (HTTP ${respostaImagem.status}).`);
+        }
+      } else if (removerImagem) {
+        const respostaImagem = await fetch(`${API_URL}/produtos/${produtoEditando.id}/imagem`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!respostaImagem.ok) {
+          throw new Error(`Dados atualizados, mas a remoção da imagem falhou (HTTP ${respostaImagem.status}).`);
+        }
+      }
+
+      setProdutoEditando(null);
+      setImagemSelecionada(null);
+      setImagemPreview(null);
+      setRemoverImagem(false);
+      setErroEdicao("");
 
       setMensagemSucesso("Produto atualizado com sucesso.");
 
       await carregarEstoque();
     } catch (error) {
-      Alert.alert("Erro", error.message);
+      setErroEdicao(error.message);
     } finally {
       setSalvando(false);
     }
@@ -468,8 +527,17 @@ export default function Estoque({ usuario, voltar }) {
 
         {/* Formulário de edição - somente administrador */}
         {produtoEditando && administrador && (
+          <Modal visible transparent animationType="fade" onRequestClose={cancelarEdicao}>
+            <View style={styles.fundoModal}>
+              <View style={styles.caixaModal}>
+                <ScrollView contentContainerStyle={styles.conteudoModal} keyboardShouldPersistTaps="handled">
           <View style={styles.cardFormulario}>
-            <Text style={styles.tituloFormulario}>Editar produto</Text>
+            <View style={styles.cabecalhoModal}>
+              <Text style={styles.tituloFormulario}>Editar produto</Text>
+              <Pressable disabled={salvando} onPress={cancelarEdicao} accessibilityLabel="Fechar edição">
+                <Text style={styles.fecharModal}>×</Text>
+              </Pressable>
+            </View>
 
             <View style={styles.quantidadeAtual}>
               <Text style={styles.quantidadeAtualTexto}>Quantidade atual</Text>
@@ -522,6 +590,31 @@ export default function Estoque({ usuario, voltar }) {
               keyboardType="number-pad"
             />
 
+            <Text style={styles.label}>Imagem do produto</Text>
+            <View style={styles.areaImagemEdicao}>
+              {imagemPreview ? (
+                <Image source={{ uri: imagemPreview }} style={styles.imagemEdicao} resizeMode="contain" />
+              ) : removerImagem ? (
+                <Text style={styles.semImagem}>Imagem removida</Text>
+              ) : (
+                <MiniaturaProduto produto={produtoEditando} token={token} />
+              )}
+            </View>
+            {Platform.OS === "web" && (
+              <View style={styles.areaImagemBotoes}>
+                <label style={{ display: "inline-block", cursor: "pointer", padding: 10, borderRadius: 8, backgroundColor: "#dbeafe", color: "#1d4ed8", fontWeight: 600, fontSize: 13 }}>
+                  Selecionar imagem
+                  <input type="file" accept="image/jpeg,image/png" onChange={selecionarImagem}
+                    style={{ display: "none" }} />
+                </label>
+                <Pressable onPress={() => { setImagemSelecionada(null); setImagemPreview(null); setRemoverImagem(Boolean(produtoEditando.imagemCaminho)); }}>
+                  <Text style={styles.textoExcluir}>Remover imagem</Text>
+                </Pressable>
+              </View>
+            )}
+            <Text style={styles.avisoImagem}>JPG ou PNG • Até 5 MB</Text>
+            {!!erroEdicao && <Text style={styles.erro}>{erroEdicao}</Text>}
+
             <View style={styles.areaBotoes}>
               <Pressable
                 style={[styles.botaoSalvar, salvando && styles.botaoDesabilitado]}
@@ -536,6 +629,10 @@ export default function Estoque({ usuario, voltar }) {
               </Pressable>
             </View>
           </View>
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
         )}
 
         {/* Mensagem de sucesso */}
@@ -773,6 +870,15 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
 
+  fundoModal: { flex: 1, backgroundColor: "rgba(15,23,42,0.72)", justifyContent: "center", alignItems: "center", padding: 16 },
+  caixaModal: { width: "100%", maxWidth: 520, maxHeight: "92%", backgroundColor: "#ffffff", borderRadius: 18, overflow: "hidden" },
+  conteudoModal: { padding: 18 },
+  cabecalhoModal: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
+  fecharModal: { fontSize: 28, color: "#64748b", paddingHorizontal: 8 },
+  areaImagemEdicao: { minHeight: 96, alignItems: "flex-start", justifyContent: "center", marginBottom: 12 },
+  imagemEdicao: { width: 120, height: 120, borderRadius: 10 },
+  areaImagemBotoes: { flexDirection: "row", alignItems: "center", gap: 18, marginBottom: 8 },
+  avisoImagem: { fontSize: 11, color: "#64748b", marginBottom: 18 },
   // Formulário de edição
   cardFormulario: {
     backgroundColor: "#ffffff",
