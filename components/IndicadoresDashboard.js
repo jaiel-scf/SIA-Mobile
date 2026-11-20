@@ -83,10 +83,10 @@ export default function IndicadoresDashboard({ usuario, escuro, irParaEstoque, i
     }, [carregar, atualizacao]),
   );
 
-  const texto = escuro ? "#F8FAFC" : "#0F172A";
-  const secundario = escuro ? "#A9B9D0" : "#64748B";
-  const fundo = escuro ? "#17233A" : "#FFFFFF";
-  const borda = escuro ? "#2B3B54" : "#E7EDF5";
+  const texto = escuro ? "#f1f5f9" : "#0F172A";
+  const secundario = escuro ? "#94a3b8" : "#64748B";
+  const fundo = escuro ? "#1e293b" : "#FFFFFF";
+  const borda = escuro ? "#334155" : "#E7EDF5";
 
   if (carregando) {
     return (
@@ -136,7 +136,7 @@ export default function IndicadoresDashboard({ usuario, escuro, irParaEstoque, i
       <View style={styles.cartoes}>
         {indicadores.map((item) => (
           <Pressable key={item.titulo} onPress={() => { if (item.titulo === "Produtos cadastrados") irParaEstoque?.(); else if (item.titulo === "Requisições") irParaSaidas?.(); else if (item.titulo === "Estoque baixo") setModalEstoque(true); else if (item.titulo === "Sem custo médio" && administrador) setModalSemCusto(true); }} accessibilityRole="button" accessibilityLabel={item.descricao} style={[styles.cartao, { backgroundColor: fundo, borderColor: borda }]}>
-            <View style={[styles.icone, { backgroundColor: escuro ? "#253550" : item.suave }]}>
+            <View style={[styles.icone, { backgroundColor: escuro ? "#243247" : item.suave }]}>
               <Text style={[styles.iconeTexto, { color: item.cor }]}>{item.icone}</Text>
             </View>
             <Text style={[styles.numero, { color: texto }]}>{item.valor}</Text>
@@ -153,7 +153,7 @@ export default function IndicadoresDashboard({ usuario, escuro, irParaEstoque, i
           </View>
           <Text style={[styles.percentual, { color: percentualBaixo ? "#EA580C" : "#16A34A" }]}>{percentualBaixo}%</Text>
         </View>
-        <View style={[styles.barra, { backgroundColor: escuro ? "#2B3B54" : "#E7EDF5" }]}>
+        <View style={[styles.barra, { backgroundColor: escuro ? "#334155" : "#E7EDF5" }]}>
           <View style={{ width: percentualBaixo + "%", height: "100%", backgroundColor: "#EA580C", borderRadius: 8 }} />
         </View>
         <Text style={[styles.descricao, { color: secundario }]}>
