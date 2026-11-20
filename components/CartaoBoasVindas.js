@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Animated, Platform, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, PanResponder, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-const LIMITE = 5;
+const LIMITE = 13;
 
 export default function CartaoBoasVindas({ nome, perfil }) {
   const eixoX = useRef(new Animated.Value(0)).current;
   const eixoY = useRef(new Animated.Value(0)).current;
   const profundidade = useRef(new Animated.Value(0)).current;
-  const [largura, setLargura] = useState(1);
-  const [altura, setAltura] = useState(1);
-
+  
   useEffect(() => {
     return () => {
       eixoX.stopAnimation();
@@ -28,12 +26,22 @@ export default function CartaoBoasVindas({ nome, perfil }) {
     ]).start();
   }
 
-  function acompanhar(evento) {
-    const { locationX, locationY } = evento.nativeEvent;
-    const x = Math.max(-1, Math.min(1, (locationX / largura) * 2 - 1));
-    const y = Math.max(-1, Math.min(1, (locationY / altura) * 2 - 1));
-    animar(x, y, true);
-  }
+  // PanResponder reconhece arrasto contínuo no Android e no navegador.
+  // A inclinação usa o deslocamento do dedo, sem depender de locationX/locationY.
+  const responder = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      animar(0, 0, true);
+    },
+    onPanResponderMove: (_evento, gesto) => {
+      const x = Math.max(-1, Math.min(1, gesto.dx / 75));
+      const y = Math.max(-1, Math.min(1, gesto.dy / 75));
+      animar(x, y, true);
+    },
+    onPanResponderRelease: () => animar(0, 0, false),
+    onPanResponderTerminate: () => animar(0, 0, false),
+  })).current;
 
   const inclinacaoX = eixoY.interpolate({
     inputRange: [-1, 1],
@@ -50,24 +58,7 @@ export default function CartaoBoasVindas({ nome, perfil }) {
 
   return (
     <View
-      onLayout={(evento) => {
-        setLargura(Math.max(1, evento.nativeEvent.layout.width));
-        setAltura(Math.max(1, evento.nativeEvent.layout.height));
-      }}
-      onStartShouldSetResponder={() => true}
-      onMoveShouldSetResponder={() => false}
-      onResponderGrant={acompanhar}
-      onResponderMove={acompanhar}
-      onResponderRelease={() => animar(0, 0, false)}
-      onResponderTerminate={() => animar(0, 0, false)}
-      {...(Platform.OS === "web"
-        ? {
-            onPointerMove: (evento) => {
-              if (evento.nativeEvent.buttons) acompanhar(evento);
-            },
-            onPointerLeave: () => animar(0, 0, false),
-          }
-        : {})}
+      {...responder.panHandlers}
       accessibilityLabel={`Bem-vindo, ${nome}. Perfil: ${perfil}`}
     >
       <Animated.View
