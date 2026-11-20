@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import { API_URL } from "../config/api";
 import SendIcon from "../assets/icons/send.svg";
+import { LinearGradient } from "expo-linear-gradient";
 
 const REQUISICOES_POR_PAGINA = 3;
 
@@ -611,11 +612,12 @@ function ajustarObservacao() {
           <Text style={styles.textoVoltar}>‹</Text>
         </Pressable>
 
-        <View style={styles.caixaIcone}>
+        <LinearGradient colors={["#2563EB", "#38BDF8"]} style={styles.caixaIcone}>
           <SendIcon width={27} height={27} color="#ffffff" />
-        </View>
+        </LinearGradient>
 
         <View style={styles.areaTitulo}>
+          <Text style={styles.etiqueta}>GESTÃO DE MATERIAIS</Text>
           <Text style={styles.titulo}>Requisições</Text>
 
           <Text style={styles.subtitulo}>Consultar e solicitar materiais</Text>
@@ -1068,9 +1070,9 @@ function ajustarObservacao() {
 const criarEstilos = (escuro) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: escuro ? "#0f172a" : "#f8fafc",
+    backgroundColor: escuro ? "#0f172a" : "#F4F7FC",
     paddingHorizontal: 20,
-    paddingTop: 55,
+    paddingTop: 36,
   },
 
   cabecalho: {
@@ -1083,7 +1085,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: escuro ? "#243247" : "#e2e8f0",
+    backgroundColor: escuro ? "#243247" : "#EAF1FC",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -1096,10 +1098,9 @@ const criarEstilos = (escuro) => StyleSheet.create({
   },
 
   caixaIcone: {
-    width: 45,
-    height: 45,
-    borderRadius: 13,
-    backgroundColor: "#2563eb",
+    width: 48,
+    height: 48,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -1108,6 +1109,8 @@ const criarEstilos = (escuro) => StyleSheet.create({
   areaTitulo: {
     flex: 1,
   },
+
+  etiqueta: { fontSize: 10, fontWeight: "800", color: "#2563EB", letterSpacing: 1.3, marginBottom: 3 },
 
   titulo: {
     fontSize: 24,
@@ -1146,7 +1149,9 @@ const criarEstilos = (escuro) => StyleSheet.create({
 
   card: {
     backgroundColor: escuro ? "#1e293b" : "#ffffff",
-    borderRadius: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: escuro ? "#334155" : "#E7EDF5",
     padding: 20,
     marginBottom: 18,
     shadowColor: "#000000",
