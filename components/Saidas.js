@@ -886,6 +886,7 @@ function ajustarObservacao() {
               {mostrarProdutos && (
                 <View style={styles.listaProdutos}>
                   {produtos.length === 0 && <Text style={styles.semResultado}>Nenhum material encontrado.</Text>}
+                  <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={styles.rolagemProdutos}>
 
                   {produtos.map((produto) => (
                     <Pressable
@@ -903,6 +904,7 @@ function ajustarObservacao() {
                       <Text style={styles.produtoCodigo}>Disponível: {produto.quantidade ?? 0}</Text>
                     </Pressable>
                   ))}
+                  </ScrollView>
                 </View>
               )}
 
@@ -1241,7 +1243,11 @@ const criarEstilos = (escuro) => StyleSheet.create({
     borderRadius: 12,
     marginBottom: 18,
     overflow: "hidden",
-    maxHeight: 300,
+    backgroundColor: escuro ? "#172235" : "#ffffff",
+  },
+
+  rolagemProdutos: {
+    maxHeight: 260,
   },
 
   listaStatus: {
@@ -1255,7 +1261,7 @@ const criarEstilos = (escuro) => StyleSheet.create({
   produtoOpcao: {
     padding: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: escuro ? "#334155" : "#e2e8f0",
   },
 
   produtoOpcaoTexto: {
