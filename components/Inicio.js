@@ -81,11 +81,11 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema,
   const perfil = administrador ? "Administrador" : "Usuário";
 
   const cores = {
-    fundo: escuro ? "#0B1220" : "#F4F7FC",
-    card: escuro ? "#17233A" : "#FFFFFF",
-    texto: escuro ? "#F8FAFC" : "#0F172A",
-    secundario: escuro ? "#A9B9D0" : "#64748B",
-    borda: escuro ? "#2B3B54" : "#E7EDF5",
+    fundo: escuro ? "#0f172a" : "#F4F7FC",
+    card: escuro ? "#1e293b" : "#FFFFFF",
+    texto: escuro ? "#f1f5f9" : "#0F172A",
+    secundario: escuro ? "#94a3b8" : "#64748B",
+    borda: escuro ? "#334155" : "#E7EDF5",
   };
 
   function fecharModalSenha() {
