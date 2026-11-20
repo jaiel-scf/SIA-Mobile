@@ -165,7 +165,7 @@ export default function App() {
             }
             return (
               <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Usuarios" escuro={escuro}>
-                <Usuarios usuario={usuario} voltar={() => navigation.goBack()} />
+                <Usuarios usuario={usuario} voltar={() => navigation.goBack()} escuro={escuro} />
               </TelaComMenu>
             );
           }}
