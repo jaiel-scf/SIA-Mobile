@@ -288,7 +288,7 @@ export default function Estoque({ usuario, voltar }) {
     }
 
     const dados = {
-      nome: nome.trim(),
+      nome: nome.trim().toLocaleUpperCase("pt-BR"),
       codigo: codigo.trim().toUpperCase(),
       descricao: descricao.trim(),
       localizacao: localizacao.trim(),
@@ -555,7 +555,7 @@ export default function Estoque({ usuario, voltar }) {
 
             <Text style={styles.label}>Nome</Text>
 
-            <TextInput style={styles.input} value={nome} onChangeText={setNome} />
+            <TextInput style={styles.input} value={nome} onChangeText={(valor) => setNome(valor.toLocaleUpperCase("pt-BR"))} />
 
             <Text style={styles.label}>Descrição</Text>
 
