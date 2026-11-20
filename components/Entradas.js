@@ -383,7 +383,7 @@ export default function Entradas({ usuario, voltar }) {
 
     setMensagemSucesso("");
 
-    const nome = novoNome.trim();
+    const nome = novoNome.trim().toLocaleUpperCase("pt-BR");
     const codigo = novoCodigo.trim().toUpperCase();
     const descricao = novaDescricao.trim();
     const localizacao = novaLocalizacao.trim();
@@ -724,7 +724,7 @@ export default function Entradas({ usuario, voltar }) {
                     placeholder="Ex.: Papel A4"
                     placeholderTextColor="#94a3b8"
                     value={novoNome}
-                    onChangeText={setNovoNome}
+                    onChangeText={(valor) => setNovoNome(valor.toLocaleUpperCase("pt-BR"))}
                     editable={!salvando}
                   />
 
