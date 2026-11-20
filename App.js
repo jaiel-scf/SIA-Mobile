@@ -133,7 +133,7 @@ export default function App() {
         <Stack.Screen name="Estoque">
           {({ navigation, route }) => (
             <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Estoque" escuro={escuro}>
-              <Estoque usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
+              <Estoque usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
         </Stack.Screen>
@@ -142,7 +142,7 @@ export default function App() {
         <Stack.Screen name="Entradas">
           {({ navigation, route }) => (
             <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Entradas" escuro={escuro}>
-              <Entradas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
+              <Entradas usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
         </Stack.Screen>
