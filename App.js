@@ -151,7 +151,7 @@ export default function App() {
         <Stack.Screen name="Saidas">
           {({ navigation, route }) => (
             <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Saidas" escuro={escuro}>
-              <Saidas usuario={route.params?.usuario} voltar={() => navigation.goBack()} />
+              <Saidas usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
         </Stack.Screen>
