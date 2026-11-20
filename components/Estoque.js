@@ -116,12 +116,12 @@ function MiniaturaProduto({ produto, token }) {
   }, [produto.id, caminho, token]);
 
   return (
-    <View style={styles.miniaturaContainer}>
+    <View style={estilosClaros.miniaturaContainer}>
       {imagemBase64 && !falhou ? (
-        <Image source={{ uri: imagemBase64 }} style={styles.miniatura} resizeMode="cover"
+        <Image source={{ uri: imagemBase64 }} style={estilosClaros.miniatura} resizeMode="cover"
           onError={() => setFalhou(true)} />
       ) : (
-        <Text style={styles.semImagem}>{caminho && !falhou ? "Carregando..." : "Sem imagem"}</Text>
+        <Text style={estilosClaros.semImagem}>{caminho && !falhou ? "Carregando..." : "Sem imagem"}</Text>
       )}
     </View>
   );
@@ -146,7 +146,8 @@ function gerarCodigoProduto() {
   return `P${ano}${mes}${dia}.${sufixo}`;
 }
 
-export default function Estoque({ usuario, voltar }) {
+export default function Estoque({ usuario, voltar, escuro = false }) {
+  const styles = escuro ? estilosEscuros : estilosClaros;
   // Lista de produtos e pesquisa
   const [produtos, setProdutos] = useState([]);
   const [pesquisa, setPesquisa] = useState("");
@@ -796,7 +797,7 @@ export default function Estoque({ usuario, voltar }) {
   );
 }
 
-const styles = StyleSheet.create({
+const estilosClaros = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f7fc",
@@ -1238,3 +1239,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
 });
+
+
+// Paleta escura compartilhada com o restante do SIA-Mobile.
+// Mantém cores semânticas (sucesso, erro, status e seleção ativa).
+const mapaCoresEscuras = {
+  "#f4f7fc": "#0f172a", "#F4F7FC": "#0f172a",
+  "#ffffff": "#1e293b", "#FFFFFF": "#1e293b",
+  "#f1f5f9": "#243247", "#F1F5F9": "#243247",
+  "#e2e8f0": "#334155", "#E2E8F0": "#334155",
+  "#e7edf5": "#334155", "#E7EDF5": "#334155",
+  "#DBE3EE": "#334155", "#cbd5e1": "#475569",
+  "#0f172a": "#f1f5f9", "#1e293b": "#f1f5f9",
+  "#334155": "#cbd5e1", "#475569": "#cbd5e1",
+  "#64748b": "#94a3b8", "#64748B": "#94a3b8",
+  "#1e3a8a": "#93c5fd", "#2563eb": "#818cf8", "#2563EB": "#818cf8",
+  "#EFF6FF": "#243247", "#dbeafe": "#273449", "#DBEAFE": "#273449",
+  "#EAF1FC": "#243247", "#1d4ed8": "#a5b4fc", "#1D4ED8": "#a5b4fc",
+};
+const coresTextoEscuro = { "#0f172a": "#f1f5f9", "#1e293b": "#f1f5f9", "#334155": "#cbd5e1", "#475569": "#cbd5e1", "#64748b": "#94a3b8", "#64748B": "#94a3b8" };
+const estilosEscuros = StyleSheet.create(Object.fromEntries(
+  Object.entries(estilosClaros).map(([nome, estilo]) => {
+    const alterado = { ...estilo };
+    for (const propriedade of ["backgroundColor", "borderColor", "borderBottomColor", "borderTopColor", "color"]) {
+      const cor = alterado[propriedade];
+      if (typeof cor === "string" && mapaCoresEscuras[cor]) {
+        // Botões azuis selecionados e seus textos brancos devem continuar legíveis.
+        if (propriedade === "color" && cor === "#ffffff" && /Selecionad|Ativ|Salvar/.test(nome)) continue;
+        if (propriedade === "backgroundColor" && (nome === "botaoSalvar" || nome === "botaoTipoSelecionado" || nome === "paginaAtiva")) continue;
+        alterado[propriedade] = mapaCoresEscuras[cor];
+      }
+    }
+    if (nome === "input" || nome === "inputObservacao" || nome === "pesquisa") {
+      alterado.backgroundColor = "#172235";
+      alterado.color = "#f1f5f9";
+    }
+    return [nome, alterado];
+  })
+));
