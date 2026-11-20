@@ -89,6 +89,9 @@ export default function Entradas({ usuario, voltar }) {
   // Campos da entrada
   const [observacao, setObservacao] = useState("");
   const [ultimasEntradas, setUltimasEntradas] = useState([]);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+  const [erroHistorico, setErroHistorico] = useState("");
+  const [paginaHistorico, setPaginaHistorico] = useState(1);
   const [mensagemSucesso, setMensagemSucesso] = useState("");
 
   const token = usuario?.token;
@@ -175,11 +178,39 @@ export default function Entradas({ usuario, voltar }) {
     }
   }, [token, administrador]);
 
+  // Consulta movimentações persistidas, não apenas registros desta sessão.
+  const carregarHistorico = useCallback(async () => {
+    if (!token || !administrador) return;
+    setCarregandoHistorico(true);
+    setErroHistorico("");
+    try {
+      const resposta = await fetch(`${API_URL}/movimentacoes/listar`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resposta.ok) throw new Error(`Não foi possível carregar o histórico (HTTP ${resposta.status}).`);
+      const dados = await resposta.json();
+      if (!Array.isArray(dados)) throw new Error("Formato inesperado do histórico.");
+      const entradas = dados.filter((item) => String(item.tipo ?? "").toUpperCase() === "ENTRADA");
+      entradas.sort((a, b) => {
+        const dataA = new Date(a.dataMovimentacao ?? a.dataHora ?? a.data ?? 0).getTime() || 0;
+        const dataB = new Date(b.dataMovimentacao ?? b.dataHora ?? b.data ?? 0).getTime() || 0;
+        return dataB - dataA || Number(b.id ?? 0) - Number(a.id ?? 0);
+      });
+      setUltimasEntradas(entradas);
+      setPaginaHistorico(1);
+    } catch (error) {
+      setErroHistorico(error.message || "Não foi possível consultar o histórico.");
+    } finally {
+      setCarregandoHistorico(false);
+    }
+  }, [token, administrador]);
+
   // Atualiza os produtos ao abrir a tela
   useFocusEffect(
     useCallback(() => {
       carregarProdutos();
-    }, [carregarProdutos]),
+      carregarHistorico();
+    }, [carregarProdutos, carregarHistorico]),
   );
 
   // Limpa os dados da entrada
@@ -214,19 +245,6 @@ export default function Entradas({ usuario, voltar }) {
     setMensagemSucesso("");
     setMostrarProdutos(false);
     setObservacao("");
-  }
-
-  // Adiciona a entrada ao histórico da sessão
-  function adicionarHistorico(nomeProduto, quantidadeEntrada, tipo) {
-    const registro = {
-      id: `${Date.now()}-${Math.random()}`,
-      produto: nomeProduto,
-      quantidade: quantidadeEntrada,
-      data: formatarData(new Date()),
-      tipo,
-    };
-
-    setUltimasEntradas((anteriores) => [registro, ...anteriores]);
   }
 
   // Registra a movimentação no backend
@@ -309,7 +327,7 @@ export default function Entradas({ usuario, voltar }) {
         custo,
       );
 
-      adicionarHistorico(produto.nome, Number(quantidade), "Entrada");
+      await carregarHistorico();
 
       setProdutoSelecionado("");
       setQuantidade("");
@@ -458,7 +476,7 @@ export default function Entradas({ usuario, voltar }) {
         return;
       }
 
-      adicionarHistorico(nome, quantidadeRecebida, "Novo produto");
+      await carregarHistorico();
 
       limparNovoProduto();
 
@@ -832,33 +850,42 @@ export default function Entradas({ usuario, voltar }) {
 
           {/* Histórico da sessão */}
           <View style={styles.card}>
-            <View style={styles.cabecalhoCard}><View style={styles.iconeHistorico}><PackagePlusIcon width={20} height={20} color="#2563EB" /></View><View style={{ flex: 1 }}><Text style={styles.cardTitulo}>Últimas entradas</Text><Text style={styles.cardDescricao}>Registros realizados nesta sessão.</Text></View></View>
+            <View style={styles.cabecalhoCard}><View style={styles.iconeHistorico}><PackagePlusIcon width={20} height={20} color="#2563EB" /></View><View style={{ flex: 1 }}><Text style={styles.cardTitulo}>Últimas entradas</Text><Text style={styles.cardDescricao}>Registros de entradas salvos no sistema.</Text></View></View>
 
-            {ultimasEntradas.length === 0 && (
+            {carregandoHistorico && <Text style={styles.semEntrada}>Carregando histórico...</Text>}
+            {!!erroHistorico && <Text style={styles.semEntrada}>{erroHistorico}</Text>}
+            {!carregandoHistorico && !erroHistorico && ultimasEntradas.length === 0 && (
               <Text style={styles.semEntrada}>
-                Nenhuma entrada registrada nesta sessão.
+                Nenhuma entrada registrada.
               </Text>
             )}
 
-            {ultimasEntradas.map((entrada) => (
+            {!carregandoHistorico && !erroHistorico && ultimasEntradas.slice((paginaHistorico - 1) * 3, paginaHistorico * 3).map((entrada) => (
               <View key={entrada.id} style={styles.entradaItem}>
                 <View style={styles.dadosEntrada}>
-                  <Text style={styles.entradaProduto}>{entrada.produto}</Text>
+                  <Text style={styles.entradaProduto}>{entrada.produtoNome ?? entrada.nomeProduto ?? entrada.produto?.nome ?? produtos.find((produto) => String(produto.id) === String(entrada.produtoId))?.nome ?? `Produto #${entrada.produtoId ?? "-"}`}</Text>
 
                   <Text style={styles.entradaQuantidade}>
                     +{entrada.quantidade} unidades
                   </Text>
 
-                  {entrada.tipo === "Novo produto" && (
-                    <Text style={styles.novoProdutoHistorico}>
-                      Novo produto
-                    </Text>
-                  )}
+
                 </View>
 
-                <Text style={styles.entradaData}>{entrada.data}</Text>
+                <Text style={styles.entradaData}>{entrada.dataMovimentacao || entrada.dataHora || entrada.data ? formatarData(entrada.dataMovimentacao ?? entrada.dataHora ?? entrada.data) : "-"}</Text>
               </View>
             ))}
+            {ultimasEntradas.length > 3 && !carregandoHistorico && !erroHistorico && (
+              <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 18, marginTop: 14 }}>
+                <Pressable disabled={paginaHistorico === 1} onPress={() => setPaginaHistorico((pagina) => pagina - 1)}>
+                  <Text style={{ color: paginaHistorico === 1 ? "#94a3b8" : "#2563eb", fontWeight: "700" }}>‹ Anterior</Text>
+                </Pressable>
+                <Text style={styles.entradaData}>{paginaHistorico} de {Math.ceil(ultimasEntradas.length / 3)}</Text>
+                <Pressable disabled={paginaHistorico >= Math.ceil(ultimasEntradas.length / 3)} onPress={() => setPaginaHistorico((pagina) => pagina + 1)}>
+                  <Text style={{ color: paginaHistorico >= Math.ceil(ultimasEntradas.length / 3) ? "#94a3b8" : "#2563eb", fontWeight: "700" }}>Próxima ›</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
