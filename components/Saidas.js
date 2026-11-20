@@ -1066,7 +1066,7 @@ function ajustarObservacao() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#0f172a",
     paddingHorizontal: 20,
     paddingTop: 55,
   },
@@ -1081,7 +1081,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#243247",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -1089,7 +1089,7 @@ const styles = StyleSheet.create({
 
   textoVoltar: {
     fontSize: 32,
-    color: "#c2410c",
+    color: "#60a5fa",
     marginTop: -3,
   },
 
@@ -1097,7 +1097,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 13,
-    backgroundColor: "#f97316",
+    backgroundColor: "#2563eb",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -1110,12 +1110,12 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
   },
 
   subtitulo: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     marginTop: 2,
   },
 
@@ -1129,7 +1129,7 @@ const styles = StyleSheet.create({
   },
 
   botaoNovo: {
-    backgroundColor: "#f97316",
+    backgroundColor: "#2563eb",
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
@@ -1143,7 +1143,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     borderRadius: 18,
     padding: 20,
     marginBottom: 18,
@@ -1160,26 +1160,26 @@ const styles = StyleSheet.create({
   cardTitulo: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
     marginBottom: 20,
   },
 
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#334155",
+    color: "#cbd5e1",
     marginBottom: 8,
   },
 
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#334155",
     borderRadius: 12,
     paddingHorizontal: 14,
     fontSize: 15,
-    color: "#0f172a",
-    backgroundColor: "#ffffff",
+    color: "#f1f5f9",
+    backgroundColor: "#172235",
     marginBottom: 18,
   },
 
@@ -1187,12 +1187,12 @@ const styles = StyleSheet.create({
     minHeight: 95,
     maxHeight: 150,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#334155",
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    color: "#0f172a",
-    backgroundColor: "#ffffff",
+    color: "#f1f5f9",
+    backgroundColor: "#172235",
     textAlignVertical: "top",
     marginBottom: 20,
   },
@@ -1200,20 +1200,20 @@ const styles = StyleSheet.create({
   seletor: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#334155",
     borderRadius: 12,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#172235",
   },
 
   textoSelecionado: {
     flex: 1,
     fontSize: 15,
-    color: "#0f172a",
+    color: "#f1f5f9",
     marginRight: 10,
   },
 
@@ -1223,12 +1223,12 @@ const styles = StyleSheet.create({
 
   setaSeletor: {
     fontSize: 12,
-    color: "#64748b",
+    color: "#94a3b8",
   },
 
   listaProdutos: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#334155",
     borderRadius: 12,
     marginBottom: 18,
     overflow: "hidden",
@@ -1237,7 +1237,7 @@ const styles = StyleSheet.create({
 
   listaStatus: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#334155",
     borderRadius: 12,
     marginBottom: 18,
     overflow: "hidden",
@@ -1251,7 +1251,7 @@ const styles = StyleSheet.create({
 
   produtoOpcaoTexto: {
     fontSize: 15,
-    color: "#334155",
+    color: "#cbd5e1",
     fontWeight: "600",
   },
 
@@ -1269,7 +1269,7 @@ const styles = StyleSheet.create({
   botaoSalvar: {
     flex: 1,
     minHeight: 50,
-    backgroundColor: "#f97316",
+    backgroundColor: "#2563eb",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -1291,14 +1291,14 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#334155",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoBotaoLimpar: {
-    color: "#475569",
+    color: "#cbd5e1",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -1321,7 +1321,7 @@ const styles = StyleSheet.create({
 
   aviso: {
     textAlign: "center",
-    color: "#64748b",
+    color: "#94a3b8",
     marginBottom: 18,
   },
 
@@ -1339,17 +1339,17 @@ const styles = StyleSheet.create({
   },
 
   textoTentar: {
-    color: "#c2410c",
+    color: "#60a5fa",
     fontWeight: "600",
   },
 
   campoData: {
     minHeight: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: "#334155",
     borderRadius: 12,
     paddingHorizontal: 14,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     marginBottom: 18,
     flexDirection: "row",
     alignItems: "center",
@@ -1358,12 +1358,12 @@ const styles = StyleSheet.create({
 
   textoCampoData: {
     fontSize: 15,
-    color: "#334155",
+    color: "#cbd5e1",
   },
 
   iconeCalendario: {
     fontSize: 23,
-    color: "#ea580c",
+    color: "#60a5fa",
   },
 
   botaoLimparFiltros: {
@@ -1372,7 +1372,7 @@ const styles = StyleSheet.create({
   },
 
   textoLimparFiltros: {
-    color: "#c2410c",
+    color: "#60a5fa",
     fontWeight: "600",
     fontSize: 14,
   },
@@ -1385,11 +1385,11 @@ const styles = StyleSheet.create({
 
   requisicaoItem: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "#334155",
     borderRadius: 12,
     padding: 14,
     marginBottom: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
   },
 
   linhaRequisicao: {
@@ -1404,7 +1404,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
   },
 
   status: {
@@ -1420,13 +1420,13 @@ const styles = StyleSheet.create({
 
   dadoRequisicao: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     marginBottom: 5,
   },
 
   textoExibir: {
     fontSize: 13,
-    color: "#c2410c",
+    color: "#60a5fa",
     fontWeight: "600",
     marginTop: 8,
   },
@@ -1434,14 +1434,14 @@ const styles = StyleSheet.create({
   areaPaginacao: {
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: "#334155",
     paddingTop: 18,
     marginTop: 8,
   },
 
   textoPaginacao: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     marginBottom: 12,
   },
 
@@ -1459,15 +1459,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    backgroundColor: "#ffffff",
+    borderColor: "#334155",
+    backgroundColor: "#1e293b",
     alignItems: "center",
     justifyContent: "center",
   },
 
   paginaAtiva: {
-    backgroundColor: "#f97316",
-    borderColor: "#f97316",
+    backgroundColor: "#2563eb",
+    borderColor: "#2563eb",
   },
 
   botaoPaginaDesabilitado: {
@@ -1477,7 +1477,7 @@ const styles = StyleSheet.create({
   textoPagina: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#475569",
+    color: "#cbd5e1",
   },
 
   textoPaginaAtiva: {
@@ -1501,7 +1501,7 @@ const styles = StyleSheet.create({
   cardModalDetalhes: {
     width: "100%",
     maxHeight: "90%",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 8,
@@ -1518,7 +1518,7 @@ const styles = StyleSheet.create({
   cardModalFormulario: {
     width: "100%",
     maxHeight: "100%",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 8,
@@ -1548,12 +1548,12 @@ const styles = StyleSheet.create({
   tituloDetalhes: {
     fontSize: 19,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f1f5f9",
   },
 
   subtituloDetalhes: {
     fontSize: 12,
-    color: "#64748b",
+    color: "#94a3b8",
     marginTop: 5,
   },
 
@@ -1561,14 +1561,14 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 10,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: "#243247",
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoFecharDetalhes: {
     fontSize: 26,
-    color: "#475569",
+    color: "#cbd5e1",
     marginTop: -3,
   },
 
@@ -1584,14 +1584,14 @@ const styles = StyleSheet.create({
 
   labelDetalhe: {
     fontSize: 13,
-    color: "#64748b",
+    color: "#94a3b8",
     fontWeight: "600",
     marginBottom: 4,
   },
 
   valorDetalhe: {
     fontSize: 15,
-    color: "#0f172a",
+    color: "#f1f5f9",
     marginBottom: 18,
   },
 
@@ -1646,7 +1646,7 @@ const styles = StyleSheet.create({
   },
 
   cardCalendario: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1e293b",
     borderRadius: 18,
     padding: 18,
   },
@@ -1662,20 +1662,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#fff7ed",
+    backgroundColor: "#243247",
     justifyContent: "center",
     alignItems: "center",
   },
 
   textoSetaCalendario: {
     fontSize: 28,
-    color: "#c2410c",
+    color: "#60a5fa",
     marginTop: -3,
   },
 
   tituloCalendario: {
     fontSize: 17,
-    color: "#0f172a",
+    color: "#f1f5f9",
     fontWeight: "bold",
   },
 
@@ -1693,7 +1693,7 @@ const styles = StyleSheet.create({
 
   diaSemana: {
     fontSize: 12,
-    color: "#64748b",
+    color: "#94a3b8",
     fontWeight: "bold",
   },
 
@@ -1706,12 +1706,12 @@ const styles = StyleSheet.create({
   },
 
   diaSelecionado: {
-    backgroundColor: "#f97316",
+    backgroundColor: "#2563eb",
   },
 
   textoDia: {
     fontSize: 14,
-    color: "#334155",
+    color: "#cbd5e1",
   },
 
   textoDiaSelecionado: {
@@ -1727,12 +1727,12 @@ const styles = StyleSheet.create({
   },
 
   limparCalendario: {
-    color: "#64748b",
+    color: "#94a3b8",
     fontWeight: "600",
   },
 
   fecharCalendario: {
-    color: "#c2410c",
+    color: "#60a5fa",
     fontWeight: "bold",
   },
 });
