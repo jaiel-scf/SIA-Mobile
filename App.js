@@ -4,6 +4,7 @@ import { View } from "react-native";
 import { useState } from "react";
 
 import MenuInferior from "./components/MenuInferior";
+import MenuUsuario from "./components/MenuUsuario";
 
 import Introducao from "./components/Introducao";
 import Login from "./components/Login";
@@ -16,10 +17,11 @@ import Usuarios from "./components/Usuarios";
 
 const Stack = createNativeStackNavigator();
 
-function TelaComMenu({ navigation, usuario, telaAtual, escuro, children }) {
+function TelaComMenu({ navigation, usuario, telaAtual, escuro, alternarTema, children }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>{children}</View>
+      <MenuUsuario usuario={usuario} escuro={escuro} alternarTema={alternarTema} voltarParaLogin={() => navigation.replace("Login")} />
       <MenuInferior
         telaAtual={telaAtual}
         escuro={escuro}
@@ -97,7 +99,7 @@ export default function App() {
             const usuario = route.params?.usuario;
 
             return (
-              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Inicio" escuro={escuro}>
+              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Inicio" escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)}>
                 <Inicio
                 usuario={usuario}
                 escuro={escuro}
@@ -132,7 +134,7 @@ export default function App() {
         {/* Estoque */}
         <Stack.Screen name="Estoque">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Estoque" escuro={escuro}>
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Estoque" escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)}>
               <Estoque usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
@@ -141,7 +143,7 @@ export default function App() {
         {/* Entradas */}
         <Stack.Screen name="Entradas">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Entradas" escuro={escuro}>
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Entradas" escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)}>
               <Entradas usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
@@ -150,7 +152,7 @@ export default function App() {
         {/* Requisições */}
         <Stack.Screen name="Saidas">
           {({ navigation, route }) => (
-            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Saidas" escuro={escuro}>
+            <TelaComMenu navigation={navigation} usuario={route.params?.usuario} telaAtual="Saidas" escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)}>
               <Saidas usuario={route.params?.usuario} voltar={() => navigation.goBack()} escuro={escuro} />
             </TelaComMenu>
           )}
@@ -164,7 +166,7 @@ export default function App() {
               return <Inicio usuario={usuario} voltarParaLogin={() => navigation.replace("Login")} escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)} />;
             }
             return (
-              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Usuarios" escuro={escuro}>
+              <TelaComMenu navigation={navigation} usuario={usuario} telaAtual="Usuarios" escuro={escuro} alternarTema={() => setEscuro((anterior) => !anterior)}>
                 <Usuarios usuario={usuario} voltar={() => navigation.goBack()} escuro={escuro} />
               </TelaComMenu>
             );
