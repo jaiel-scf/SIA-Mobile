@@ -216,6 +216,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState("");
   const [mostrarProdutos, setMostrarProdutos] = useState(false);
+  const [buscaProduto, setBuscaProduto] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [observacao, setObservacao] = useState("");
 
@@ -328,6 +329,12 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
     }, [carregarDados]),
   );
 
+  const produtosParaSelecao = produtos.filter((produto) => {
+    const termo = buscaProduto.trim().toLocaleLowerCase("pt-BR");
+    return !termo || String(produto.nome ?? "").toLocaleLowerCase("pt-BR").includes(termo)
+      || String(produto.codigo ?? "").toLocaleLowerCase("pt-BR").includes(termo);
+  });
+
   function buscarNomeProduto(id) {
     const produto = produtos.find((item) => String(item.id) === String(id));
 
@@ -348,12 +355,14 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   function abrirFormulario() {
     setMensagemSucesso("");
     setMostrarProdutos(false);
+    setBuscaProduto("");
     setMostrarFormulario(true);
   }
 
   function limparFormulario() {
     setProdutoSelecionado("");
     setMostrarProdutos(false);
+    setBuscaProduto("");
     setQuantidade("");
     setObservacao("");
   }
@@ -872,7 +881,10 @@ function ajustarObservacao() {
               <Pressable
                 style={styles.seletor}
                 disabled={salvando || carregando || !!erro}
-                onPress={() => setMostrarProdutos(!mostrarProdutos)}
+                onPress={() => {
+                  setBuscaProduto("");
+                  setMostrarProdutos(!mostrarProdutos);
+                }}
               >
                 <Text style={[styles.textoSelecionado, !produtoAtual && styles.placeholder]} numberOfLines={1}>
                   {produtoAtual
@@ -885,10 +897,22 @@ function ajustarObservacao() {
 
               {mostrarProdutos && (
                 <View style={styles.listaProdutos}>
-                  {produtos.length === 0 && <Text style={styles.semResultado}>Nenhum material encontrado.</Text>}
+                  <TextInput
+                    style={styles.buscaProduto}
+                    placeholder="Buscar material por nome ou código"
+                    placeholderTextColor="#94a3b8"
+                    value={buscaProduto}
+                    onChangeText={setBuscaProduto}
+                    autoCorrect={false}
+                  />
+                  <Text style={styles.contagemProdutos}>
+                    {produtosParaSelecao.length} de {produtos.length} materiais
+                  </Text>
+                  {produtosParaSelecao.length === 0 && (
+                    <Text style={styles.semResultado}>Nenhum material encontrado.</Text>
+                  )}
                   <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={styles.rolagemProdutos}>
-
-                  {produtos.map((produto) => (
+                  {produtosParaSelecao.map((produto) => (
                     <Pressable
                       key={produto.id}
                       style={styles.produtoOpcao}
@@ -1244,6 +1268,26 @@ const criarEstilos = (escuro) => StyleSheet.create({
     marginBottom: 18,
     overflow: "hidden",
     backgroundColor: escuro ? "#172235" : "#ffffff",
+  },
+
+  buscaProduto: {
+    margin: 10,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: escuro ? "#334155" : "#e2e8f0",
+    borderRadius: 10,
+    backgroundColor: escuro ? "#172235" : "#ffffff",
+    color: escuro ? "#f1f5f9" : "#0f172a",
+    fontSize: 14,
+  },
+
+  contagemProdutos: {
+    marginHorizontal: 12,
+    marginBottom: 8,
+    color: escuro ? "#94a3b8" : "#64748b",
+    fontSize: 12,
   },
 
   rolagemProdutos: {
