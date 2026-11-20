@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 import { useFocusEffect } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { API_URL } from "../config/api";
 
 import UserPlusIcon from "../assets/icons/user-plus.svg";
@@ -22,7 +23,8 @@ import EyeOffIcon from "../assets/icons/eye-off.svg";
 
 const USUARIOS_POR_PAGINA = 3;
 
-export default function Usuarios({ usuario, voltar }) {
+export default function Usuarios({ usuario, voltar, escuro = false }) {
+  const styles = criarEstilos(escuro);
   const token = usuario?.token;
   const administrador = String(usuario?.perfil ?? "").toLowerCase() === "admin";
 
@@ -326,11 +328,12 @@ export default function Usuarios({ usuario, voltar }) {
           <Text style={styles.textoVoltar}>‹</Text>
         </Pressable>
 
-        <View style={styles.caixaIcone}>
+        <LinearGradient colors={["#2563EB", "#38BDF8"]} style={styles.caixaIcone}>
           <UserPlusIcon width={27} height={27} color="#ffffff" />
-        </View>
+        </LinearGradient>
 
         <View style={styles.areaTitulo}>
+          <Text style={styles.etiqueta}>GESTÃO DE MATERIAIS</Text>
           <Text style={styles.titulo}>Usuários</Text>
           <Text style={styles.subtitulo}>Cadastro e gerenciamento</Text>
         </View>
@@ -633,12 +636,12 @@ export default function Usuarios({ usuario, voltar }) {
   );
 }
 
-const styles = StyleSheet.create({
+const criarEstilos = (escuro) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: escuro ? "#0f172a" : "#F4F7FC",
     paddingHorizontal: 20,
-    paddingTop: 55,
+    paddingTop: 36,
   },
 
   cabecalho: {
@@ -651,7 +654,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: escuro ? "#334155" : "#e2e8f0",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -659,15 +662,14 @@ const styles = StyleSheet.create({
 
   textoVoltar: {
     fontSize: 32,
-    color: "#7c3aed",
+    color: escuro ? "#6366f1" : "#7c3aed",
     marginTop: -3,
   },
 
   caixaIcone: {
-    width: 45,
-    height: 45,
-    borderRadius: 13,
-    backgroundColor: "#7c3aed",
+    width: 48,
+    height: 48,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -677,15 +679,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  etiqueta: { fontSize: 10, fontWeight: "800", color: "#2563EB", letterSpacing: 1.3, marginBottom: 3 },
+
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: escuro ? "#f1f5f9" : "#0f172a",
   },
 
   subtitulo: {
     fontSize: 13,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginTop: 2,
   },
 
@@ -694,7 +698,7 @@ const styles = StyleSheet.create({
   },
 
   botaoNovo: {
-    backgroundColor: "#7c3aed",
+    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
@@ -708,8 +712,10 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#ffffff",
-    borderRadius: 18,
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: escuro ? "#334155" : "#E7EDF5",
     padding: 20,
     marginBottom: 18,
     shadowColor: "#000000",
@@ -725,26 +731,26 @@ const styles = StyleSheet.create({
   cardTitulo: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginBottom: 5,
   },
 
   cardSubtitulo: {
     fontSize: 13,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 16,
   },
 
   semUsuario: {
     fontSize: 14,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     paddingVertical: 12,
   },
 
   usuarioItem: {
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: escuro ? "#334155" : "#e2e8f0",
   },
 
   dadosUsuario: {
@@ -754,12 +760,12 @@ const styles = StyleSheet.create({
   usuarioNome: {
     fontSize: 15,
     fontWeight: "bold",
-    color: "#334155",
+    color: escuro ? "#cbd5e1" : "#334155",
   },
 
   usuarioEmail: {
     fontSize: 13,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginTop: 4,
   },
 
@@ -772,14 +778,14 @@ const styles = StyleSheet.create({
   },
 
   perfilUsuario: {
-    backgroundColor: "#f1f5f9",
+    backgroundColor: escuro ? "#243247" : "#f1f5f9",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
   },
 
   perfilUsuarioTexto: {
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
     fontSize: 12,
     fontWeight: "600",
   },
@@ -789,7 +795,7 @@ const styles = StyleSheet.create({
   },
 
   perfilAdministradorTexto: {
-    color: "#7c3aed",
+    color: escuro ? "#6366f1" : "#7c3aed",
   },
 
   statusAtivo: {
@@ -865,7 +871,7 @@ const styles = StyleSheet.create({
   },
 
   tentarNovamente: {
-    color: "#7c3aed",
+    color: escuro ? "#6366f1" : "#7c3aed",
     fontWeight: "bold",
     fontSize: 14,
   },
@@ -873,14 +879,14 @@ const styles = StyleSheet.create({
   areaPaginacao: {
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: escuro ? "#334155" : "#e2e8f0",
     paddingTop: 18,
     marginTop: 12,
   },
 
   textoPaginacao: {
     fontSize: 13,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 12,
   },
 
@@ -898,15 +904,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    backgroundColor: "#ffffff",
+    borderColor: escuro ? "#334155" : "#e2e8f0",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },
 
   paginaAtiva: {
-    backgroundColor: "#7c3aed",
-    borderColor: "#7c3aed",
+    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
+    borderColor: escuro ? "#6366f1" : "#7c3aed",
   },
 
   botaoPaginaDesabilitado: {
@@ -916,7 +922,7 @@ const styles = StyleSheet.create({
   textoPagina: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
   },
 
   textoPaginaAtiva: {
@@ -942,7 +948,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxHeight: "100%",
     maxWidth: 450,
-    backgroundColor: "#ffffff",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 20,
     overflow: "hidden",
     elevation: 8,
@@ -954,7 +960,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: escuro ? "#334155" : "#e2e8f0",
   },
 
   areaTituloModal: {
@@ -965,27 +971,27 @@ const styles = StyleSheet.create({
   tituloModal: {
     fontSize: 19,
     fontWeight: "bold",
-    color: "#0f172a",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginBottom: 5,
   },
 
   subtituloModal: {
     fontSize: 12,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
   },
 
   botaoFechar: {
     width: 35,
     height: 35,
     borderRadius: 10,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: escuro ? "#243247" : "#f1f5f9",
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoFechar: {
     fontSize: 26,
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
     marginTop: -3,
   },
 
@@ -997,25 +1003,25 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#334155",
+    color: escuro ? "#cbd5e1" : "#334155",
     marginBottom: 8,
   },
 
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: escuro ? "#334155" : "#cbd5e1",
     borderRadius: 12,
     paddingHorizontal: 14,
     fontSize: 15,
-    color: "#0f172a",
+    color: escuro ? "#f1f5f9" : "#0f172a",
     marginBottom: 18,
   },
 
   campoSenha: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: escuro ? "#334155" : "#cbd5e1",
     borderRadius: 12,
     flexDirection: "row",
     alignItems: "center",
@@ -1027,7 +1033,7 @@ const styles = StyleSheet.create({
     height: "100%",
     paddingHorizontal: 14,
     fontSize: 15,
-    color: "#0f172a",
+    color: escuro ? "#f1f5f9" : "#0f172a",
   },
 
   botaoOlho: {
@@ -1039,7 +1045,7 @@ const styles = StyleSheet.create({
 
   avisoSenha: {
     fontSize: 12,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 20,
     lineHeight: 18,
   },
@@ -1054,22 +1060,22 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: escuro ? "#334155" : "#cbd5e1",
     borderRadius: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },
 
   botaoPerfilSelecionado: {
-    backgroundColor: "#7c3aed",
-    borderColor: "#7c3aed",
+    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
+    borderColor: escuro ? "#6366f1" : "#7c3aed",
   },
 
   textoBotaoPerfil: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
   },
 
   textoPerfilSelecionado: {
@@ -1078,7 +1084,7 @@ const styles = StyleSheet.create({
 
   perfilEscolhido: {
     fontSize: 12,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     marginBottom: 20,
   },
 
@@ -1090,7 +1096,7 @@ const styles = StyleSheet.create({
   botaoSalvar: {
     flex: 1,
     minHeight: 50,
-    backgroundColor: "#7c3aed",
+    backgroundColor: escuro ? "#6366f1" : "#7c3aed",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -1112,14 +1118,14 @@ const styles = StyleSheet.create({
     minHeight: 50,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: escuro ? "#334155" : "#cbd5e1",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoBotaoLimpar: {
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -1127,14 +1133,14 @@ const styles = StyleSheet.create({
   modalExclusao: {
     width: "100%",
     maxWidth: 380,
-    backgroundColor: "#ffffff",
+    backgroundColor: escuro ? "#1e293b" : "#ffffff",
     borderRadius: 18,
     padding: 22,
   },
 
   textoModal: {
     fontSize: 14,
-    color: "#64748b",
+    color: escuro ? "#94a3b8" : "#64748b",
     lineHeight: 21,
     marginBottom: 18,
   },
@@ -1165,14 +1171,14 @@ const styles = StyleSheet.create({
     minHeight: 45,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
+    borderColor: escuro ? "#334155" : "#cbd5e1",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
 
   textoCancelarModal: {
-    color: "#475569",
+    color: escuro ? "#cbd5e1" : "#475569",
     fontSize: 14,
     fontWeight: "600",
   },
