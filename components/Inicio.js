@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import BlocksIcon from "../assets/icons/blocks.svg";
 import CartaoBoasVindas from "./CartaoBoasVindas";
 import IndicadoresDashboard from "./IndicadoresDashboard";
+import DashboardUsuario from "./DashboardUsuario";
 
 export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema, irParaEstoque, irParaSaidas }) {
   const cores = {
@@ -27,8 +28,12 @@ export default function Inicio({ usuario, voltarParaLogin, escuro, alternarTema,
 
         <CartaoBoasVindas nome={usuario?.nome || "Usuário"} perfil={String(usuario?.perfil ?? "").toLowerCase() === "admin" ? "Administrador" : "Usuário"} />
 
-        <Text style={[styles.secao, { color: cores.texto }]}>Dashboard</Text>
-        <IndicadoresDashboard usuario={usuario} escuro={escuro} irParaEstoque={irParaEstoque} irParaSaidas={irParaSaidas} />
+        <Text style={[styles.secao, { color: cores.texto }]}>{String(usuario?.perfil ?? "").toLowerCase() === "admin" ? "Dashboard" : "Meu painel"}</Text>
+        {String(usuario?.perfil ?? "").toLowerCase() === "admin" ? (
+          <IndicadoresDashboard usuario={usuario} escuro={escuro} irParaEstoque={irParaEstoque} irParaSaidas={irParaSaidas} />
+        ) : (
+          <DashboardUsuario usuario={usuario} escuro={escuro} irParaEstoque={irParaEstoque} irParaSaidas={irParaSaidas} />
+        )}
 
       </ScrollView>
 
