@@ -786,7 +786,6 @@ function ajustarObservacao() {
               )}
             </View>
           ) : (
-            {/* Filtros */}
           <View style={styles.card}>
             <Text style={styles.cardTitulo}>Filtros</Text>
 
