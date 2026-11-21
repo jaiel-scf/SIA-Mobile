@@ -577,7 +577,7 @@ function ajustarObservacao() {
 
     const nome = buscarNomeUsuario(requisicao.usuarioId).toLowerCase();
 
-    if (administrador && buscaRapida.trim()) {
+    if (buscaRapida.trim()) {
       const termo = buscaRapida.trim().toLocaleLowerCase("pt-BR");
       const produto = (requisicao.itens?.length ? requisicao.itens.map((item) => buscarNomeProduto(item.produtoId)).join(" ") : buscarNomeProduto(requisicao.produtoId)).toLocaleLowerCase("pt-BR");
       if (![codigo, nome, produto, String(requisicao.id)].some((campo) => campo.includes(termo))) return false;
@@ -616,7 +616,7 @@ function ajustarObservacao() {
 
   useEffect(() => {
     setPaginaAtual(1);
-  }, [filtroCodigo, filtroUsuario, filtroStatus, filtroDataCriacao, filtroDataAtualizada]);
+  }, [buscaRapida, filtroCodigo, filtroUsuario, filtroStatus, filtroDataCriacao, filtroDataAtualizada]);
 
   function mudarPagina(novaPagina) {
     if (novaPagina < 1 || novaPagina > totalPaginas || novaPagina === paginaSegura) {
@@ -720,12 +720,11 @@ function ajustarObservacao() {
             </View>
           )}
 
-          {/* Visão operacional compacta exclusiva do administrador */}
-          {administrador ? (
+          {/* Filtros padronizados para administrador e usuário comum */}
             <View style={styles.card}>
               <TextInput
                 style={styles.input}
-                placeholder="Buscar código, material ou solicitante"
+                placeholder={administrador ? "Buscar código, material ou solicitante" : "Buscar código ou material"}
                 placeholderTextColor="#94a3b8"
                 value={buscaRapida}
                 onChangeText={setBuscaRapida}
@@ -759,6 +758,8 @@ function ajustarObservacao() {
               onChangeText={setFiltroCodigo}
             />
 
+            {administrador && (
+              <View>
             <Text style={styles.label}>Criado por</Text>
 
             <TextInput
@@ -768,6 +769,9 @@ function ajustarObservacao() {
               value={filtroUsuario}
               onChangeText={setFiltroUsuario}
             />
+
+              </View>
+            )}
 
             <Text style={styles.label}>Data de criação</Text>
 
@@ -828,88 +832,8 @@ function ajustarObservacao() {
                 </View>
               )}
             </View>
-          ) : (
-          <View style={styles.card}>
-            <Text style={styles.cardTitulo}>Filtros</Text>
 
-            <Text style={styles.label}>Código</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Código da requisição"
-              placeholderTextColor="#94a3b8"
-              value={filtroCodigo}
-              onChangeText={setFiltroCodigo}
-            />
-
-            <Text style={styles.label}>Criado por</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nome do usuário"
-              placeholderTextColor="#94a3b8"
-              value={filtroUsuario}
-              onChangeText={setFiltroUsuario}
-            />
-
-            <Text style={styles.label}>Data de criação</Text>
-
-            <Pressable style={styles.campoData} onPress={() => setCalendarioAberto("criacao")}>
-              <Text style={[styles.textoCampoData, !filtroDataCriacao && styles.placeholder]}>
-                {mostrarDataCurta(filtroDataCriacao)}
-              </Text>
-
-              <Text style={styles.iconeCalendario}>▦</Text>
-            </Pressable>
-
-            <Text style={styles.label}>Status</Text>
-
-            <Pressable style={styles.seletor} onPress={() => setMostrarStatus(!mostrarStatus)}>
-              <Text style={[styles.textoSelecionado, !filtroStatus && styles.placeholder]}>
-                {filtroStatus ? situacoes[filtroStatus]?.texto : "Todos"}
-              </Text>
-
-              <Text style={styles.setaSeletor}>{mostrarStatus ? "▲" : "▼"}</Text>
-            </Pressable>
-
-            {mostrarStatus && (
-              <View style={styles.listaStatus}>
-                {[
-                  { valor: "", texto: "Todos" },
-                  { valor: "AGUARDANDO", texto: "Aguardando" },
-                  { valor: "AUTORIZADO", texto: "Autorizado" },
-                  { valor: "REPROVADO", texto: "Reprovado" },
-                  { valor: "FINALIZADO", texto: "Finalizado" },
-                ].map((item) => (
-                  <Pressable
-                    key={item.valor || "todos"}
-                    style={styles.produtoOpcao}
-                    onPress={() => {
-                      setFiltroStatus(item.valor);
-                      setMostrarStatus(false);
-                    }}
-                  >
-                    <Text style={styles.produtoOpcaoTexto}>{item.texto}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
-
-            <Text style={styles.label}>Data atualizada</Text>
-
-            <Pressable style={styles.campoData} onPress={() => setCalendarioAberto("atualizada")}>
-              <Text style={[styles.textoCampoData, !filtroDataAtualizada && styles.placeholder]}>
-                {mostrarDataCurta(filtroDataAtualizada)}
-              </Text>
-
-              <Text style={styles.iconeCalendario}>▦</Text>
-            </Pressable>
-
-            <Pressable style={styles.botaoLimparFiltros} onPress={limparFiltros}>
-              <Text style={styles.textoLimparFiltros}>Limpar filtros</Text>
-            </Pressable>
-          </View>
-          )}
 
           {/* Lista de requisições */}
           <View style={styles.card}>
