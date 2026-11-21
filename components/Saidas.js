@@ -222,8 +222,10 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
 
   // Filtros
   const [filtroCodigo, setFiltroCodigo] = useState("");
+  const [buscaRapida, setBuscaRapida] = useState("");
+  const [mostrarFiltrosAvancados, setMostrarFiltrosAvancados] = useState(false);
   const [filtroUsuario, setFiltroUsuario] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState(administrador ? "AGUARDANDO" : "");
   const [filtroDataCriacao, setFiltroDataCriacao] = useState("");
   const [filtroDataAtualizada, setFiltroDataAtualizada] = useState("");
 
@@ -517,6 +519,7 @@ function ajustarObservacao() {
 
   function limparFiltros() {
     setFiltroCodigo("");
+    setBuscaRapida("");
     setFiltroUsuario("");
     setFiltroDataCriacao("");
     setFiltroStatus("");
@@ -530,6 +533,12 @@ function ajustarObservacao() {
     const codigo = String(requisicao.codigo ?? "").toLowerCase();
 
     const nome = buscarNomeUsuario(requisicao.usuarioId).toLowerCase();
+
+    if (administrador && buscaRapida.trim()) {
+      const termo = buscaRapida.trim().toLocaleLowerCase("pt-BR");
+      const produto = buscarNomeProduto(requisicao.produtoId).toLocaleLowerCase("pt-BR");
+      if (![codigo, nome, produto, String(requisicao.id)].some((campo) => campo.includes(termo))) return false;
+    }
 
     if (filtroCodigo.trim() && !codigo.includes(filtroCodigo.trim().toLowerCase())) {
       return false;
@@ -668,7 +677,116 @@ function ajustarObservacao() {
             </View>
           )}
 
-          {/* Filtros */}
+          {/* Visão operacional compacta exclusiva do administrador */}
+          {administrador ? (
+            <View style={styles.card}>
+              <TextInput
+                style={styles.input}
+                placeholder="Buscar código, material ou solicitante"
+                placeholderTextColor="#94a3b8"
+                value={buscaRapida}
+                onChangeText={setBuscaRapida}
+              />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={{ marginTop: 12 }}>
+                {[
+                  { valor: "", texto: "Todas" },
+                  { valor: "AGUARDANDO", texto: "Aguardando" },
+                  { valor: "AUTORIZADO", texto: "Autorizadas" },
+                  { valor: "FINALIZADO", texto: "Finalizadas" },
+                  { valor: "REPROVADO", texto: "Reprovadas" },
+                ].map((item) => (
+                  <Pressable key={item.valor || "todas"} onPress={() => setFiltroStatus(item.valor)}
+                    style={{ paddingHorizontal: 13, paddingVertical: 9, borderRadius: 20, marginRight: 8, backgroundColor: filtroStatus === item.valor ? "#2563eb" : (escuro ? "#334155" : "#e2e8f0") }}>
+                    <Text style={{ color: filtroStatus === item.valor ? "#fff" : (escuro ? "#e2e8f0" : "#334155"), fontWeight: "600", fontSize: 12 }}>{item.texto}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <Pressable onPress={() => setMostrarFiltrosAvancados((anterior) => !anterior)} style={{ alignSelf: "flex-end", paddingVertical: 12 }}>
+                <Text style={{ color: escuro ? "#93c5fd" : "#2563eb", fontWeight: "600" }}>{mostrarFiltrosAvancados ? "Ocultar filtros avançados ▲" : "Filtros avançados ▼"}</Text>
+              </Pressable>
+              {mostrarFiltrosAvancados && (
+                <View>
+            <Text style={styles.label}>Código</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Código da requisição"
+              placeholderTextColor="#94a3b8"
+              value={filtroCodigo}
+              onChangeText={setFiltroCodigo}
+            />
+
+            <Text style={styles.label}>Criado por</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Nome do usuário"
+              placeholderTextColor="#94a3b8"
+              value={filtroUsuario}
+              onChangeText={setFiltroUsuario}
+            />
+
+            <Text style={styles.label}>Data de criação</Text>
+
+            <Pressable style={styles.campoData} onPress={() => setCalendarioAberto("criacao")}>
+              <Text style={[styles.textoCampoData, !filtroDataCriacao && styles.placeholder]}>
+                {mostrarDataCurta(filtroDataCriacao)}
+              </Text>
+
+              <Text style={styles.iconeCalendario}>▦</Text>
+            </Pressable>
+
+            <Text style={styles.label}>Status</Text>
+
+            <Pressable style={styles.seletor} onPress={() => setMostrarStatus(!mostrarStatus)}>
+              <Text style={[styles.textoSelecionado, !filtroStatus && styles.placeholder]}>
+                {filtroStatus ? situacoes[filtroStatus]?.texto : "Todos"}
+              </Text>
+
+              <Text style={styles.setaSeletor}>{mostrarStatus ? "▲" : "▼"}</Text>
+            </Pressable>
+
+            {mostrarStatus && (
+              <View style={styles.listaStatus}>
+                {[
+                  { valor: "", texto: "Todos" },
+                  { valor: "AGUARDANDO", texto: "Aguardando" },
+                  { valor: "AUTORIZADO", texto: "Autorizado" },
+                  { valor: "REPROVADO", texto: "Reprovado" },
+                  { valor: "FINALIZADO", texto: "Finalizado" },
+                ].map((item) => (
+                  <Pressable
+                    key={item.valor || "todos"}
+                    style={styles.produtoOpcao}
+                    onPress={() => {
+                      setFiltroStatus(item.valor);
+                      setMostrarStatus(false);
+                    }}
+                  >
+                    <Text style={styles.produtoOpcaoTexto}>{item.texto}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            <Text style={styles.label}>Data atualizada</Text>
+
+            <Pressable style={styles.campoData} onPress={() => setCalendarioAberto("atualizada")}>
+              <Text style={[styles.textoCampoData, !filtroDataAtualizada && styles.placeholder]}>
+                {mostrarDataCurta(filtroDataAtualizada)}
+              </Text>
+
+              <Text style={styles.iconeCalendario}>▦</Text>
+            </Pressable>
+
+                  <Pressable style={styles.botaoLimparFiltros} onPress={limparFiltros}>
+                    <Text style={styles.textoLimparFiltros}>Limpar filtros</Text>
+                  </Pressable>
+                </View>
+              )}
+            </View>
+          ) : (
+            {/* Filtros */}
           <View style={styles.card}>
             <Text style={styles.cardTitulo}>Filtros</Text>
 
@@ -749,6 +867,7 @@ function ajustarObservacao() {
               <Text style={styles.textoLimparFiltros}>Limpar filtros</Text>
             </Pressable>
           </View>
+          )}
 
           {/* Lista de requisições */}
           <View style={styles.card}>
@@ -781,6 +900,9 @@ function ajustarObservacao() {
                       {buscarNomeProduto(requisicao.produtoId)}
                     </Text>
 
+                    {administrador && (
+                      <Text style={styles.dadoRequisicao} numberOfLines={1}>Solicitante: {buscarNomeUsuario(requisicao.usuarioId)}</Text>
+                    )}
                     <View style={styles.resumoRequisicao}>
                       <Text style={styles.dadoRequisicao}>Qtd.: {requisicao.quantidade}</Text>
                       <Text style={styles.dadoRequisicao}>{formatarData(requisicao.dataMovimentacao)}</Text>
