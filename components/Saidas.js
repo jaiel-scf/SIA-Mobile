@@ -325,25 +325,27 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
         );
       }
 
-      const respostas = await Promise.all(buscas);
+      // O histórico de requisições deve carregar mesmo quando a consulta
+      // auxiliar de produtos ou usuários estiver indisponível.
+      const respostas = await Promise.allSettled(buscas);
+      const respostaRequisicoes = respostas[1].status === "fulfilled" ? respostas[1].value : null;
 
-      if (respostas.some((resposta) => resposta.status === 401)) {
+      if (respostaRequisicoes?.status === 401) {
         throw new Error("Sua sessão expirou. Faça login novamente.");
       }
-
-      if (!respostas[0].ok) {
-        throw new Error("Não foi possível carregar os produtos.");
+      if (!respostaRequisicoes?.ok) {
+        throw new Error(`Não foi possível carregar as requisições (HTTP ${respostaRequisicoes?.status ?? "sem conexão"}).`);
       }
 
-      if (!respostas[1].ok) {
-        throw new Error("Não foi possível carregar as requisições.");
+      const requisicoesRecebidas = await respostaRequisicoes.json();
+      if (!Array.isArray(requisicoesRecebidas)) {
+        throw new Error("O servidor retornou um histórico de requisições inválido.");
       }
 
-      const produtosRecebidos = await respostas[0].json();
-      const requisicoesRecebidas = await respostas[1].json();
-
-      if (!Array.isArray(produtosRecebidos) || !Array.isArray(requisicoesRecebidas)) {
-        throw new Error("O servidor retornou dados em formato inesperado.");
+      const respostaProdutos = respostas[0].status === "fulfilled" ? respostas[0].value : null;
+      const produtosRecebidos = respostaProdutos?.ok ? await respostaProdutos.json() : [];
+      if (!Array.isArray(produtosRecebidos)) {
+        throw new Error("O servidor retornou produtos em formato inesperado.");
       }
 
       produtosRecebidos.sort((a, b) =>
@@ -365,8 +367,8 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
       setProdutos(produtosRecebidos);
       setRequisicoes(requisicoesRecebidas);
 
-      if (administrador && respostas[2]?.ok) {
-        const usuariosRecebidos = await respostas[2].json();
+      if (administrador && respostas[2]?.status === "fulfilled" && respostas[2].value.ok) {
+        const usuariosRecebidos = await respostas[2].value.json();
 
         if (Array.isArray(usuariosRecebidos)) {
           setUsuarios(usuariosRecebidos);
