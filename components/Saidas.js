@@ -390,6 +390,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   );
 
   const produtosParaSelecao = produtos.filter((produto) => {
+    if (itensRequisicao.some((item) => item.produtoId === Number(produto.id))) return false;
     const termo = buscaProduto.trim().toLocaleLowerCase("pt-BR");
     return !termo || String(produto.nome ?? "").toLocaleLowerCase("pt-BR").includes(termo)
       || String(produto.codigo ?? "").toLocaleLowerCase("pt-BR").includes(termo);
