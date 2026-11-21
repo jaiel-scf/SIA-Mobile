@@ -666,7 +666,7 @@ export default function Estoque({ usuario, voltar, escuro = false }) {
 
             return (
               <View key={produto.id} style={styles.card}>
-                <MiniaturaProduto key={String(produto.imagemCaminho ?? "")} produto={produto} token={token} />
+                <MiniaturaProduto key={String(produto.imagemCaminho ?? "")} produto={produto} token={token} aoAmpliar={setImagemAmpliada} />
                 <View style={styles.dadosProduto}>
                   <Text style={styles.nomeProduto}>{produto.nome}</Text>
 
