@@ -1217,43 +1217,56 @@ function ajustarObservacao() {
 
             {requisicaoSelecionada && (
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.conteudoModalDetalhes}>
-                <Text style={styles.labelDetalhe}>Código</Text>
-
-                <Text style={styles.valorDetalhe}>
-                  {requisicaoSelecionada.codigo || `#${requisicaoSelecionada.id}`}
-                </Text>
-
-                <Text style={styles.labelDetalhe}>Criado por</Text>
-
-                <Text style={styles.valorDetalhe}>{buscarNomeUsuario(requisicaoSelecionada.usuarioId)}</Text>
-
-                <Text style={styles.labelDetalhe}>Materiais solicitados</Text>
-                {(requisicaoSelecionada.itens?.length
-                  ? requisicaoSelecionada.itens
-                  : [{ produtoId: requisicaoSelecionada.produtoId, quantidade: requisicaoSelecionada.quantidade }]
-                ).map((item, indice) => (
-                  <Text key={item.id || `${item.produtoId}-${indice}`} style={styles.valorDetalhe}>
-                    {buscarNomeProduto(item.produtoId)} — Qtd.: {item.quantidade}
+                <View style={{ backgroundColor: escuro ? "#243247" : "#f8fafc", borderColor: escuro ? "#334155" : "#e2e8f0", borderWidth: 1, borderRadius: 14, padding: 16, marginBottom: 14 }}>
+                  <Text style={[styles.labelDetalhe, { marginTop: 0 }]}>CÓDIGO DA REQUISIÇÃO</Text>
+                  <Text style={[styles.valorDetalhe, { fontSize: 18, fontWeight: "800", marginBottom: 12 }]}>
+                    {requisicaoSelecionada.codigo || `#${requisicaoSelecionada.id}`}
                   </Text>
-                ))}
-
-                <Text style={styles.labelDetalhe}>Status</Text>
-
-                <View style={[styles.statusDetalhe, { backgroundColor: statusDetalhe.fundo }]}>
-                  <Text style={[styles.textoStatus, { color: statusDetalhe.cor }]}>{statusDetalhe.texto}</Text>
+                  <Text style={styles.labelDetalhe}>SITUAÇÃO ATUAL</Text>
+                  <View style={[styles.statusDetalhe, { backgroundColor: statusDetalhe.fundo, alignSelf: "flex-start" }]}>
+                    <Text style={[styles.textoStatus, { color: statusDetalhe.cor }]}>{statusDetalhe.texto}</Text>
+                  </View>
                 </View>
 
-                <Text style={styles.labelDetalhe}>Data de criação</Text>
+                <View style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
+                  <View style={{ flex: 1, padding: 13, borderWidth: 1, borderRadius: 12, borderColor: escuro ? "#334155" : "#e2e8f0" }}>
+                    <Text style={[styles.labelDetalhe, { marginTop: 0 }]}>SOLICITANTE</Text>
+                    <Text style={[styles.valorDetalhe, { marginBottom: 0 }]}>{buscarNomeUsuario(requisicaoSelecionada.usuarioId)}</Text>
+                  </View>
+                  <View style={{ flex: 1, padding: 13, borderWidth: 1, borderRadius: 12, borderColor: escuro ? "#334155" : "#e2e8f0" }}>
+                    <Text style={[styles.labelDetalhe, { marginTop: 0 }]}>DATAS</Text>
+                    <Text style={[styles.valorDetalhe, { fontSize: 12 }]}>Criada: {formatarData(requisicaoSelecionada.dataMovimentacao)}</Text>
+                    <Text style={[styles.valorDetalhe, { fontSize: 12, marginBottom: 0 }]}>Atualizada: {formatarData(requisicaoSelecionada.dataAtualizada)}</Text>
+                  </View>
+                </View>
 
-                <Text style={styles.valorDetalhe}>{formatarData(requisicaoSelecionada.dataMovimentacao)}</Text>
+                <View style={{ borderWidth: 1, borderRadius: 14, borderColor: escuro ? "#334155" : "#e2e8f0", overflow: "hidden", marginBottom: 14 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14, backgroundColor: escuro ? "#243247" : "#f8fafc" }}>
+                    <Text style={[styles.valorDetalhe, { fontWeight: "800", marginBottom: 0 }]}>Materiais solicitados</Text>
+                    <Text style={styles.labelDetalhe}>
+                      {(requisicaoSelecionada.itens?.length || 1)} {(requisicaoSelecionada.itens?.length || 1) === 1 ? "material" : "materiais"}
+                    </Text>
+                  </View>
+                  {(requisicaoSelecionada.itens?.length
+                    ? requisicaoSelecionada.itens
+                    : [{ produtoId: requisicaoSelecionada.produtoId, quantidade: requisicaoSelecionada.quantidade }]
+                  ).map((item, indice) => (
+                    <View key={item.id || `${item.produtoId}-${indice}`} style={{ flexDirection: "row", alignItems: "center", padding: 12, gap: 10, borderTopWidth: 1, borderTopColor: escuro ? "#334155" : "#e2e8f0" }}>
+                      <View style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: escuro ? "#334155" : "#dbeafe", justifyContent: "center", alignItems: "center" }}>
+                        <Text style={{ color: escuro ? "#bfdbfe" : "#1d4ed8", fontWeight: "800" }}>{indice + 1}</Text>
+                      </View>
+                      <Text style={[styles.valorDetalhe, { flex: 1, marginBottom: 0 }]}>{buscarNomeProduto(item.produtoId)}</Text>
+                      <View style={{ borderRadius: 8, backgroundColor: escuro ? "#334155" : "#f1f5f9", paddingHorizontal: 10, paddingVertical: 7 }}>
+                        <Text style={{ color: escuro ? "#f1f5f9" : "#334155", fontWeight: "800" }}>{item.quantidade}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
 
-                <Text style={styles.labelDetalhe}>Data atualizada</Text>
-
-                <Text style={styles.valorDetalhe}>{formatarData(requisicaoSelecionada.dataAtualizada)}</Text>
-
-                <Text style={styles.labelDetalhe}>Observação</Text>
-
-                <Text style={styles.valorDetalhe}>{requisicaoSelecionada.observacao || "Sem observação"}</Text>
+                <View style={{ padding: 14, borderWidth: 1, borderRadius: 12, borderColor: escuro ? "#334155" : "#e2e8f0", marginBottom: 14 }}>
+                  <Text style={[styles.labelDetalhe, { marginTop: 0 }]}>OBSERVAÇÃO</Text>
+                  <Text style={[styles.valorDetalhe, { marginBottom: 0 }]}>{requisicaoSelecionada.observacao || "Sem observação"}</Text>
+                </View>
 
                 {administrador && statusSelecionado === "AGUARDANDO" && (
                   <View style={styles.areaAcoesAdmin}>
