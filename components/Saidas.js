@@ -1252,9 +1252,6 @@ function ajustarObservacao() {
                     : [{ produtoId: requisicaoSelecionada.produtoId, quantidade: requisicaoSelecionada.quantidade }]
                   ).map((item, indice) => (
                     <View key={item.id || `${item.produtoId}-${indice}`} style={{ flexDirection: "row", alignItems: "center", padding: 12, gap: 10, borderTopWidth: 1, borderTopColor: escuro ? "#334155" : "#e2e8f0" }}>
-                      <View style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: escuro ? "#334155" : "#dbeafe", justifyContent: "center", alignItems: "center" }}>
-                        <Text style={{ color: escuro ? "#bfdbfe" : "#1d4ed8", fontWeight: "800" }}>{indice + 1}</Text>
-                      </View>
                       <FotoMaterial
                         produto={produtos.find((produto) => Number(produto.id) === Number(item.produtoId)) || { id: item.produtoId, nome: buscarNomeProduto(item.produtoId) }}
                         token={token}
