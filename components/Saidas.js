@@ -225,7 +225,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   const [buscaRapida, setBuscaRapida] = useState("");
   const [mostrarFiltrosAvancados, setMostrarFiltrosAvancados] = useState(false);
   const [filtroUsuario, setFiltroUsuario] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState(administrador ? "AGUARDANDO" : "");
+  const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroDataCriacao, setFiltroDataCriacao] = useState("");
   const [filtroDataAtualizada, setFiltroDataAtualizada] = useState("");
 
