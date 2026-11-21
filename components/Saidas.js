@@ -273,6 +273,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   const [imagemAmpliada, setImagemAmpliada] = useState(null);
   const [buscaProduto, setBuscaProduto] = useState("");
   const [quantidade, setQuantidade] = useState("");
+  const [itensRequisicao, setItensRequisicao] = useState([]);
   const [observacao, setObservacao] = useState("");
 
   // Filtros
@@ -324,25 +325,27 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
         );
       }
 
-      const respostas = await Promise.all(buscas);
+      // O histórico de requisições deve carregar mesmo quando a consulta
+      // auxiliar de produtos ou usuários estiver indisponível.
+      const respostas = await Promise.allSettled(buscas);
+      const respostaRequisicoes = respostas[1].status === "fulfilled" ? respostas[1].value : null;
 
-      if (respostas.some((resposta) => resposta.status === 401)) {
+      if (respostaRequisicoes?.status === 401) {
         throw new Error("Sua sessão expirou. Faça login novamente.");
       }
-
-      if (!respostas[0].ok) {
-        throw new Error("Não foi possível carregar os produtos.");
+      if (!respostaRequisicoes?.ok) {
+        throw new Error(`Não foi possível carregar as requisições (HTTP ${respostaRequisicoes?.status ?? "sem conexão"}).`);
       }
 
-      if (!respostas[1].ok) {
-        throw new Error("Não foi possível carregar as requisições.");
+      const requisicoesRecebidas = await respostaRequisicoes.json();
+      if (!Array.isArray(requisicoesRecebidas)) {
+        throw new Error("O servidor retornou um histórico de requisições inválido.");
       }
 
-      const produtosRecebidos = await respostas[0].json();
-      const requisicoesRecebidas = await respostas[1].json();
-
-      if (!Array.isArray(produtosRecebidos) || !Array.isArray(requisicoesRecebidas)) {
-        throw new Error("O servidor retornou dados em formato inesperado.");
+      const respostaProdutos = respostas[0].status === "fulfilled" ? respostas[0].value : null;
+      const produtosRecebidos = respostaProdutos?.ok ? await respostaProdutos.json() : [];
+      if (!Array.isArray(produtosRecebidos)) {
+        throw new Error("O servidor retornou produtos em formato inesperado.");
       }
 
       produtosRecebidos.sort((a, b) =>
@@ -364,8 +367,8 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
       setProdutos(produtosRecebidos);
       setRequisicoes(requisicoesRecebidas);
 
-      if (administrador && respostas[2]?.ok) {
-        const usuariosRecebidos = await respostas[2].json();
+      if (administrador && respostas[2]?.status === "fulfilled" && respostas[2].value.ok) {
+        const usuariosRecebidos = await respostas[2].value.json();
 
         if (Array.isArray(usuariosRecebidos)) {
           setUsuarios(usuariosRecebidos);
@@ -421,6 +424,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
     setMostrarProdutos(false);
     setBuscaProduto("");
     setQuantidade("");
+    setItensRequisicao([]);
     setObservacao("");
   }
 
@@ -443,33 +447,32 @@ function ajustarObservacao() {
   }, 350);
 }
 
-  // Envia a nova requisição ao backend
+  function adicionarItem() {
+    const quantidadeNumero = Number(quantidade);
+    const produto = produtos.find((item) => String(item.id) === String(produtoSelecionado));
+    if (!produto || !Number.isSafeInteger(quantidadeNumero) || quantidadeNumero <= 0) {
+      Alert.alert("Dados inválidos", "Selecione um material e informe uma quantidade inteira maior que zero.");
+      return;
+    }
+    if (itensRequisicao.some((item) => item.produtoId === Number(produtoSelecionado))) {
+      Alert.alert("Material repetido", "Este material já foi adicionado. Remova-o para informar outra quantidade.");
+      return;
+    }
+    setItensRequisicao((anteriores) => [...anteriores, { produtoId: Number(produtoSelecionado), quantidade: quantidadeNumero }]);
+    setProdutoSelecionado("");
+    setQuantidade("");
+    setMostrarProdutos(false);
+  }
+
+  // Um unico envio cria uma unica requisicao com todos os materiais.
   async function salvarRequisicao() {
     if (salvando) return;
-
+    if (itensRequisicao.length === 0) {
+      Alert.alert("Requisição vazia", "Adicione pelo menos um material antes de enviar.");
+      return;
+    }
     setMensagemSucesso("");
-
-    const quantidadeNumero = Number(quantidade);
-
-    if (
-      !produtoSelecionado ||
-      quantidade.trim() === "" ||
-      !Number.isSafeInteger(quantidadeNumero) ||
-      quantidadeNumero <= 0
-    ) {
-      Alert.alert("Erro", "Selecione um material e informe uma quantidade inteira maior que zero.");
-      return;
-    }
-
-    const produto = produtos.find((item) => String(item.id) === String(produtoSelecionado));
-
-    if (!produto) {
-      Alert.alert("Erro", "O material selecionado não foi encontrado.");
-      return;
-    }
-
     setSalvando(true);
-
     try {
       const resposta = await fetch(`${API_URL}/movimentacoes/requisicoes`, {
         method: "POST",
@@ -477,39 +480,23 @@ function ajustarObservacao() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          produtoId: Number(produtoSelecionado),
-          quantidade: quantidadeNumero,
-          observacao: observacao.trim(),
-        }),
+        body: JSON.stringify({ itens: itensRequisicao, observacao: observacao.trim() }),
       });
-
-      if (resposta.status === 401) {
-        throw new Error("Sua sessão expirou. Faça login novamente.");
-      }
-
-      if (resposta.status === 403) {
-        throw new Error("Você não tem permissão para criar requisições.");
-      }
-
+      if (resposta.status === 401) throw new Error("Sua sessão expirou. Faça login novamente.");
+      if (resposta.status === 403) throw new Error("Você não tem permissão para criar requisições.");
       if (!resposta.ok) {
-        throw new Error("Não foi possível enviar a requisição.");
+        const respostaErro = await resposta.text();
+        throw new Error(respostaErro || "Não foi possível enviar a requisição.");
       }
-
       Keyboard.dismiss();
       limparFormulario();
       setMostrarFormulario(false);
       setPaginaAtual(1);
       setMensagemSucesso("Requisição enviada com sucesso!");
-
       await carregarDados();
     } catch (error) {
       console.error("Erro ao enviar requisição:", error);
-
-      Alert.alert(
-        "Erro",
-        error.message === "Network request failed" ? "Não foi possível conectar ao servidor." : error.message,
-      );
+      Alert.alert("Erro", error.message === "Network request failed" ? "Não foi possível conectar ao servidor." : error.message);
     } finally {
       setSalvando(false);
     }
@@ -591,7 +578,7 @@ function ajustarObservacao() {
 
     if (administrador && buscaRapida.trim()) {
       const termo = buscaRapida.trim().toLocaleLowerCase("pt-BR");
-      const produto = buscarNomeProduto(requisicao.produtoId).toLocaleLowerCase("pt-BR");
+      const produto = (requisicao.itens?.length ? requisicao.itens.map((item) => buscarNomeProduto(item.produtoId)).join(" ") : buscarNomeProduto(requisicao.produtoId)).toLocaleLowerCase("pt-BR");
       if (![codigo, nome, produto, String(requisicao.id)].some((campo) => campo.includes(termo))) return false;
     }
 
@@ -951,14 +938,16 @@ function ajustarObservacao() {
                     </View>
 
                     <Text style={styles.nomeProdutoRequisicao} numberOfLines={1}>
-                      {buscarNomeProduto(requisicao.produtoId)}
+                      {requisicao.itens?.length > 1
+                        ? `${requisicao.itens.length} materiais: ${requisicao.itens.map((item) => buscarNomeProduto(item.produtoId)).join(", ")}`
+                        : buscarNomeProduto(requisicao.itens?.[0]?.produtoId ?? requisicao.produtoId)}
                     </Text>
 
                     {administrador && (
                       <Text style={styles.dadoRequisicao} numberOfLines={1}>Solicitante: {buscarNomeUsuario(requisicao.usuarioId)}</Text>
                     )}
                     <View style={styles.resumoRequisicao}>
-                      <Text style={styles.dadoRequisicao}>Qtd.: {requisicao.quantidade}</Text>
+                      <Text style={styles.dadoRequisicao}>{requisicao.itens?.length > 1 ? `${requisicao.itens.length} itens` : `Qtd.: ${requisicao.itens?.[0]?.quantidade ?? requisicao.quantidade}`}</Text>
                       <Text style={styles.dadoRequisicao}>{formatarData(requisicao.dataMovimentacao)}</Text>
                       <Text style={styles.textoExibir}>Detalhes ›</Text>
                     </View>
@@ -1124,6 +1113,41 @@ function ajustarObservacao() {
                 editable={!salvando}
               />
 
+              <Pressable
+                style={[styles.botaoSalvar, { marginBottom: 18 }]}
+                disabled={salvando || !produtoSelecionado}
+                onPress={adicionarItem}
+              >
+                <Text style={styles.textoBotaoSalvar}>+ Adicionar material</Text>
+              </Pressable>
+
+              <Text style={styles.cardTitulo}>Materiais da requisição ({itensRequisicao.length})</Text>
+              {itensRequisicao.length === 0 && (
+                <Text style={styles.semResultado}>Nenhum material adicionado.</Text>
+              )}
+              {itensRequisicao.map((item) => {
+                const produto = produtos.find((p) => Number(p.id) === item.produtoId);
+                return (
+                  <View key={item.produtoId} style={[styles.produtoOpcao, { flexDirection: "row", alignItems: "center", marginBottom: 8 }]}>
+                    {produto && <FotoMaterial produto={produto} token={token} aoAmpliar={setImagemAmpliada} />}
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.produtoOpcaoTexto}>{produto?.nome || `Produto #${item.produtoId}`}</Text>
+                      <Text style={styles.produtoCodigo}>Quantidade: {item.quantidade}</Text>
+                    </View>
+                    <Pressable disabled={salvando} onPress={() => {
+                      setItensRequisicao((anteriores) => anteriores.filter((atual) => atual.produtoId !== item.produtoId));
+                      setProdutoSelecionado(String(item.produtoId));
+                      setQuantidade(String(item.quantidade));
+                    }} style={{ padding: 10 }}>
+                      <Text style={{ color: "#ef4444", fontWeight: "700" }}>Editar</Text>
+                    </Pressable>
+                    <Pressable disabled={salvando} onPress={() => setItensRequisicao((anteriores) => anteriores.filter((atual) => atual.produtoId !== item.produtoId))} style={{ padding: 10 }}>
+                      <Text style={{ color: "#ef4444", fontWeight: "700" }}>✕</Text>
+                    </Pressable>
+                  </View>
+                );
+              })}
+
               <Text style={styles.label}>Observação</Text>
 
               <TextInput
@@ -1202,13 +1226,15 @@ function ajustarObservacao() {
 
                 <Text style={styles.valorDetalhe}>{buscarNomeUsuario(requisicaoSelecionada.usuarioId)}</Text>
 
-                <Text style={styles.labelDetalhe}>Produto</Text>
-
-                <Text style={styles.valorDetalhe}>{buscarNomeProduto(requisicaoSelecionada.produtoId)}</Text>
-
-                <Text style={styles.labelDetalhe}>Quantidade</Text>
-
-                <Text style={styles.valorDetalhe}>{requisicaoSelecionada.quantidade}</Text>
+                <Text style={styles.labelDetalhe}>Materiais solicitados</Text>
+                {(requisicaoSelecionada.itens?.length
+                  ? requisicaoSelecionada.itens
+                  : [{ produtoId: requisicaoSelecionada.produtoId, quantidade: requisicaoSelecionada.quantidade }]
+                ).map((item, indice) => (
+                  <Text key={item.id || `${item.produtoId}-${indice}`} style={styles.valorDetalhe}>
+                    {buscarNomeProduto(item.produtoId)} — Qtd.: {item.quantidade}
+                  </Text>
+                ))}
 
                 <Text style={styles.labelDetalhe}>Status</Text>
 
