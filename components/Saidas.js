@@ -30,7 +30,7 @@ function FotoMaterial({ produto, token, aoAmpliar }) {
     let ativo = true;
     setUri(cacheImagensRequisicao.get(produto?.id) || null);
     setIndisponivel(false);
-    if (!produto?.id || !caminho || !token) return () => { ativo = false; };
+    if (!produto?.id || !token) return () => { ativo = false; };
     if (cacheImagensRequisicao.has(produto.id)) return () => { ativo = false; };
 
     (async () => {
@@ -66,7 +66,7 @@ function FotoMaterial({ produto, token, aoAmpliar }) {
       {uri && !indisponivel ? (
         <Image source={{ uri }} style={{ width: 52, height: 52 }} resizeMode="cover" />
       ) : (
-        <Text style={{ fontSize: 9, color: "#64748b", textAlign: "center" }}>{caminho && !indisponivel ? "Carregando" : "Sem imagem"}</Text>
+        <Text style={{ fontSize: 9, color: "#64748b", textAlign: "center" }}>{!indisponivel ? "Carregando" : "Sem imagem"}</Text>
       )}
     </Pressable>
   );
@@ -1255,7 +1255,17 @@ function ajustarObservacao() {
                       <View style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: escuro ? "#334155" : "#dbeafe", justifyContent: "center", alignItems: "center" }}>
                         <Text style={{ color: escuro ? "#bfdbfe" : "#1d4ed8", fontWeight: "800" }}>{indice + 1}</Text>
                       </View>
-                      <Text style={[styles.valorDetalhe, { flex: 1, marginBottom: 0 }]}>{buscarNomeProduto(item.produtoId)}</Text>
+                      <FotoMaterial
+                        produto={produtos.find((produto) => Number(produto.id) === Number(item.produtoId)) || { id: item.produtoId, nome: buscarNomeProduto(item.produtoId) }}
+                        token={token}
+                        aoAmpliar={setImagemAmpliada}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.valorDetalhe, { marginBottom: 3 }]}>{buscarNomeProduto(item.produtoId)}</Text>
+                        <Text style={{ color: escuro ? "#94a3b8" : "#64748b", fontSize: 11 }}>
+                          Código: {produtos.find((produto) => Number(produto.id) === Number(item.produtoId))?.codigo || "Não informado"}
+                        </Text>
+                      </View>
                       <View style={{ borderRadius: 8, backgroundColor: escuro ? "#334155" : "#f1f5f9", paddingHorizontal: 10, paddingVertical: 7 }}>
                         <Text style={{ color: escuro ? "#f1f5f9" : "#334155", fontWeight: "800" }}>{item.quantidade}</Text>
                       </View>
