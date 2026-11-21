@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
+  Image,
   Keyboard,
   Modal,
   Platform,
@@ -17,6 +18,59 @@ import { useFocusEffect } from "@react-navigation/native";
 import { API_URL } from "../config/api";
 import SendIcon from "../assets/icons/send.svg";
 import { LinearGradient } from "expo-linear-gradient";
+
+const cacheImagensRequisicao = new Map();
+
+function FotoMaterial({ produto, token, aoAmpliar }) {
+  const [uri, setUri] = useState(() => cacheImagensRequisicao.get(produto?.id) || null);
+  const [indisponivel, setIndisponivel] = useState(false);
+  const caminho = produto?.imagemCaminho;
+
+  useEffect(() => {
+    let ativo = true;
+    setUri(cacheImagensRequisicao.get(produto?.id) || null);
+    setIndisponivel(false);
+    if (!produto?.id || !caminho || !token) return () => { ativo = false; };
+    if (cacheImagensRequisicao.has(produto.id)) return () => { ativo = false; };
+
+    (async () => {
+      try {
+        const resposta = await fetch(`${API_URL}/produtos/${produto.id}/imagem`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resposta.ok) { if (ativo) setIndisponivel(true); return; }
+        const arquivo = await resposta.blob();
+        const leitor = new FileReader();
+        leitor.onload = () => {
+          if (typeof leitor.result !== "string") return;
+          cacheImagensRequisicao.set(produto.id, leitor.result);
+          if (ativo) setUri(leitor.result);
+        };
+        leitor.onerror = () => { if (ativo) setIndisponivel(true); };
+        leitor.readAsDataURL(arquivo);
+      } catch {
+        if (ativo) setIndisponivel(true);
+      }
+    })();
+    return () => { ativo = false; };
+  }, [produto?.id, caminho, token]);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Ampliar imagem de ${produto?.nome || "material"}`}
+      disabled={!uri || indisponivel}
+      onPress={() => aoAmpliar({ uri, nome: produto.nome })}
+      style={{ width: 52, height: 52, borderRadius: 9, overflow: "hidden", backgroundColor: "#e2e8f0", alignItems: "center", justifyContent: "center", marginRight: 12 }}
+    >
+      {uri && !indisponivel ? (
+        <Image source={{ uri }} style={{ width: 52, height: 52 }} resizeMode="cover" />
+      ) : (
+        <Text style={{ fontSize: 9, color: "#64748b", textAlign: "center" }}>{caminho && !indisponivel ? "Carregando" : "Sem imagem"}</Text>
+      )}
+    </Pressable>
+  );
+}
 
 const REQUISICOES_POR_PAGINA = 3;
 
@@ -216,6 +270,7 @@ export default function Saidas({ usuario, voltar, escuro = false }) {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState("");
   const [mostrarProdutos, setMostrarProdutos] = useState(false);
+  const [imagemAmpliada, setImagemAmpliada] = useState(null);
   const [buscaProduto, setBuscaProduto] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [observacao, setObservacao] = useState("");
@@ -1034,22 +1089,26 @@ function ajustarObservacao() {
                   )}
                   <ScrollView nestedScrollEnabled keyboardShouldPersistTaps="always" style={styles.rolagemProdutos}>
                   {produtosParaSelecao.map((produto) => (
-                    <Pressable
-                      key={produto.id}
-                      style={styles.produtoOpcao}
-                      onPress={() => {
+                    <View key={produto.id} style={[styles.produtoOpcao, { flexDirection: "row", alignItems: "center" }]}>
+                      <FotoMaterial produto={produto} token={token} aoAmpliar={setImagemAmpliada} />
+                      <Pressable style={{ flex: 1 }} onPress={() => {
                         setProdutoSelecionado(String(produto.id));
                         setMostrarProdutos(false);
-                      }}
-                    >
-                      <Text style={styles.produtoOpcaoTexto}>{produto.nome}</Text>
-
-                      <Text style={styles.produtoCodigo}>Código: {produto.codigo || "-"}</Text>
-
-                      <Text style={styles.produtoCodigo}>Disponível: {produto.quantidade ?? 0}</Text>
-                    </Pressable>
+                      }}>
+                        <Text style={styles.produtoOpcaoTexto}>{produto.nome}</Text>
+                        <Text style={styles.produtoCodigo}>Código: {produto.codigo || "-"}</Text>
+                        <Text style={styles.produtoCodigo}>Disponível: {produto.quantidade ?? 0}</Text>
+                      </Pressable>
+                    </View>
                   ))}
                   </ScrollView>
+                </View>
+              )}
+
+              {produtoAtual && (
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+                  <FotoMaterial produto={produtoAtual} token={token} aoAmpliar={setImagemAmpliada} />
+                  <Text style={[styles.produtoOpcaoTexto, { flex: 1 }]} numberOfLines={2}>{produtoAtual.nome}</Text>
                 </View>
               )}
 
@@ -1096,6 +1155,17 @@ function ajustarObservacao() {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Visualização ampliada da foto do material */}
+      <Modal visible={!!imagemAmpliada} transparent animationType="fade" onRequestClose={() => setImagemAmpliada(null)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(2,6,23,0.96)", justifyContent: "center", padding: 18 }}>
+          <Pressable onPress={() => setImagemAmpliada(null)} accessibilityRole="button" accessibilityLabel="Fechar imagem" style={{ alignSelf: "flex-end", padding: 12 }}>
+            <Text style={{ color: "#fff", fontSize: 17, fontWeight: "700" }}>Fechar ✕</Text>
+          </Pressable>
+          {imagemAmpliada && <Image source={{ uri: imagemAmpliada.uri }} resizeMode="contain" style={{ width: "100%", height: "75%" }} />}
+          <Text style={{ color: "#fff", textAlign: "center", marginTop: 12, fontWeight: "600" }}>{imagemAmpliada?.nome}</Text>
+        </View>
       </Modal>
 
       {/* Modal de detalhes */}
