@@ -15,6 +15,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 
 import { API_URL } from "../config/api";
+import MiniaturaMaterial from "./MiniaturaMaterial";
 import PackagePlusIcon from "../assets/icons/package-plus.svg";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -686,13 +687,13 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
                             setMostrarProdutos(false);
                           }}
                         >
-                          <Text style={styles.produtoOpcaoTexto}>
-                            {produto.nome}
-                          </Text>
-
-                          <Text style={styles.produtoCodigo}>
-                            Código: {produto.codigo || "-"}
-                          </Text>
+                          <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            <MiniaturaMaterial produto={produto} token={token} />
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.produtoOpcaoTexto}>{produto.nome}</Text>
+                              <Text style={styles.produtoCodigo}>Código: {produto.codigo || "-"}</Text>
+                            </View>
+                          </View>
                         </Pressable>
                       ))}
                     </View>
