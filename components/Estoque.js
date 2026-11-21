@@ -79,7 +79,7 @@ function verificarEstoque(produto) {
 }
 
 // O bucket é privado: a imagem é obtida pelo backend com autenticação.
-function MiniaturaProduto({ produto, token }) {
+function MiniaturaProduto({ produto, token, aoAmpliar }) {
   const [imagemBase64, setImagemBase64] = useState(null);
   const [falhou, setFalhou] = useState(false);
   const caminho = produto.imagemCaminho;
@@ -96,6 +96,7 @@ function MiniaturaProduto({ produto, token }) {
         const resposta = await fetch(`${API_URL}/produtos/${produto.id}/imagem`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (resposta.status === 404) { if (ativo) setFalhou(true); return; }
         if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
         const arquivo = await resposta.blob();
         const leitor = new FileReader();
@@ -116,14 +117,14 @@ function MiniaturaProduto({ produto, token }) {
   }, [produto.id, caminho, token]);
 
   return (
-    <View style={estilosClaros.miniaturaContainer}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`Ampliar imagem de ${produto.nome}`} disabled={!imagemBase64 || falhou || !aoAmpliar} onPress={() => aoAmpliar({ uri: imagemBase64, nome: produto.nome })} style={estilosClaros.miniaturaContainer}>
       {imagemBase64 && !falhou ? (
         <Image source={{ uri: imagemBase64 }} style={estilosClaros.miniatura} resizeMode="cover"
           onError={() => setFalhou(true)} />
       ) : (
         <Text style={estilosClaros.semImagem}>{caminho && !falhou ? "Carregando..." : "Sem imagem"}</Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 
@@ -152,6 +153,7 @@ export default function Estoque({ usuario, voltar, escuro = false }) {
   const [produtos, setProdutos] = useState([]);
   const [pesquisa, setPesquisa] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [imagemAmpliada, setImagemAmpliada] = useState(null);
 
   // Carregamento e mensagens
   const [carregando, setCarregando] = useState(true);
@@ -598,7 +600,7 @@ export default function Estoque({ usuario, voltar, escuro = false }) {
               ) : removerImagem ? (
                 <Text style={styles.semImagem}>Imagem removida</Text>
               ) : (
-                <MiniaturaProduto produto={produtoEditando} token={token} />
+                <MiniaturaProduto produto={produtoEditando} token={token} aoAmpliar={setImagemAmpliada} />
               )}
             </View>
             {Platform.OS === "web" && (
@@ -635,6 +637,16 @@ export default function Estoque({ usuario, voltar, escuro = false }) {
             </View>
           </Modal>
         )}
+
+        <Modal visible={!!imagemAmpliada} transparent animationType="fade" onRequestClose={() => setImagemAmpliada(null)}>
+          <View style={{ flex: 1, backgroundColor: "rgba(2,6,23,0.94)", justifyContent: "center", padding: 18 }}>
+            <Pressable onPress={() => setImagemAmpliada(null)} accessibilityRole="button" accessibilityLabel="Fechar imagem" style={{ alignSelf: "flex-end", padding: 12, marginBottom: 12 }}>
+              <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "700" }}>Fechar ✕</Text>
+            </Pressable>
+            <Image source={imagemAmpliada ? { uri: imagemAmpliada.uri } : undefined} style={{ width: "100%", height: "75%" }} resizeMode="contain" />
+            <Text style={{ color: "#ffffff", textAlign: "center", fontWeight: "600", marginTop: 12 }}>{imagemAmpliada?.nome}</Text>
+          </View>
+        </Modal>
 
         {/* Mensagem de sucesso */}
         {!!mensagemSucesso && (
