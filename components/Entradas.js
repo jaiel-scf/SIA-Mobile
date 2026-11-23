@@ -78,6 +78,7 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
   const [mostrarProdutos, setMostrarProdutos] = useState(false);
   const [quantidade, setQuantidade] = useState("");
   const [valorUnitario, setValorUnitario] = useState("");
+  const [itensEntrada, setItensEntrada] = useState([]);
 
   // Novo produto
   const [novoCodigo, setNovoCodigo] = useState("");
@@ -224,6 +225,7 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
     setProdutoSelecionado("");
     setQuantidade("");
     setValorUnitario("");
+    setItensEntrada([]);
     setObservacao("");
     setMostrarProdutos(false);
     setMensagemSucesso("");
@@ -308,6 +310,57 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
 
     if (!resposta.ok) {
       throw new Error("Não foi possível registrar a entrada.");
+    }
+  }
+
+  // Prepara vários produtos sem alterar o estoque antes da confirmação.
+  function adicionarItemEntrada() {
+    const produto = produtos.find((item) => String(item.id) === String(produtoSelecionado));
+    const custo = Number(valorUnitario.trim().replace(",", "."));
+    if (!produto || !quantidadeValida(quantidade) || !valorUnitario.trim() || !Number.isFinite(custo) || custo <= 0) {
+      Alert.alert("Dados inválidos", "Selecione um produto e informe quantidade inteira e custo unitário positivo.");
+      return;
+    }
+    if (itensEntrada.some((item) => item.produtoId === Number(produto.id))) {
+      Alert.alert("Produto já adicionado", "Remova o item da lista antes de adicioná-lo novamente.");
+      return;
+    }
+    setItensEntrada((anteriores) => [...anteriores, {
+      produtoId: Number(produto.id), nome: produto.nome, quantidade: Number(quantidade), valorUnitario: custo,
+    }]);
+    setProdutoSelecionado("");
+    setQuantidade("");
+    setValorUnitario("");
+    setMostrarProdutos(false);
+    setMensagemSucesso("");
+  }
+
+  async function salvarEntradasEmLote() {
+    if (salvando || !administrador || itensEntrada.length === 0) return;
+    setSalvando(true);
+    setMensagemSucesso("");
+    try {
+      const resposta = await fetch(`${API_URL}/movimentacoes/entradas/lote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(itensEntrada.map(({ produtoId, quantidade, valorUnitario }) => ({
+          produtoId, quantidade, valorUnitario, tipo: "ENTRADA", observacao: observacao.trim(),
+        }))),
+      });
+      if (!resposta.ok) {
+        const detalhe = await resposta.text();
+        throw new Error(resposta.status === 401 ? "Sessão expirada. Faça login novamente."
+          : resposta.status === 403 ? "Acesso permitido apenas a administradores."
+          : `Não foi possível registrar o lote (HTTP ${resposta.status}). ${detalhe.slice(0, 180)}`);
+      }
+      setItensEntrada([]);
+      setObservacao("");
+      setMensagemSucesso("Todas as entradas foram registradas com sucesso!");
+      await Promise.all([carregarProdutos(), carregarHistorico()]);
+    } catch (error) {
+      Alert.alert("Erro ao registrar entradas", error.message || "Não foi possível concluir a operação.");
+    } finally {
+      setSalvando(false);
     }
   }
 
@@ -713,6 +766,26 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
 
                   <Text style={styles.label}>Custo unitário (R$)</Text>
                   <TextInput style={styles.input} placeholder="Ex.: 12,50" placeholderTextColor="#94a3b8" value={valorUnitario} onChangeText={setValorUnitario} keyboardType="decimal-pad" editable={!salvando} />
+
+                  <Pressable disabled={bloqueado} onPress={adicionarItemEntrada} style={[styles.botaoCodigo, { marginTop: 14 }]}>
+                    <Text style={styles.textoCodigo}>+ Adicionar produto à lista</Text>
+                  </Pressable>
+                  {itensEntrada.length > 0 && (
+                    <View style={{ marginTop: 14 }}>
+                      <Text style={styles.label}>Produtos da entrada ({itensEntrada.length})</Text>
+                      {itensEntrada.map((item) => (
+                        <View key={item.produtoId} style={[styles.entradaItem, { alignItems: "center" }]}>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.entradaProduto}>{item.nome}</Text>
+                            <Text style={styles.entradaQuantidade}>{item.quantidade} × R$ {item.valorUnitario.toFixed(2).replace(".", ",")}</Text>
+                          </View>
+                          <Pressable disabled={salvando} onPress={() => setItensEntrada((anteriores) => anteriores.filter((atual) => atual.produtoId !== item.produtoId))}>
+                            <Text style={{ color: "#dc2626", fontWeight: "700" }}>Remover</Text>
+                          </Pressable>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </>
               )}
 
@@ -880,7 +953,7 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
                   ]}
                   onPress={
                     tipoEntrada === "existente"
-                      ? salvarEntradaExistente
+                      ? (itensEntrada.length > 0 ? salvarEntradasEmLote : salvarEntradaExistente)
                       : salvarNovoProduto
                   }
                 >
@@ -888,7 +961,7 @@ export default function Entradas({ usuario, voltar, escuro = false }) {
                     {salvando
                       ? "Salvando..."
                       : tipoEntrada === "existente"
-                        ? "Registrar entrada"
+                        ? (itensEntrada.length > 0 ? `Registrar ${itensEntrada.length} entradas` : "Registrar entrada")
                         : "Cadastrar produto"}
                   </Text>
                 </Pressable>
