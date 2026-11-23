@@ -9,7 +9,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.jaielsantos.SIAMobile"
+      "package": "br.edu.faama.siamobile"
     },
     "web": {},
     "extra": {
