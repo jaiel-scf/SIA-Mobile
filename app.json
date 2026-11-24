@@ -2,20 +2,25 @@
   "expo": {
     "name": "SIA-Mobile",
     "slug": "SIA-Mobile",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "br.edu.faama.siamobile"
+      "package": "br.edu.faama.siamobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/sia-adaptive-icon.png",
+        "backgroundColor": "#2563EB"
+      }
     },
     "web": {},
     "extra": {
       "eas": {
         "projectId": "002a933b-9c3e-42ea-b715-7775bc2beca2"
       }
-    }
+    },
+    "icon": "./assets/sia-icon.png"
   }
 }
